@@ -5,6 +5,7 @@
 % Define the X-axis: Containment Area from 0 to 30,000 sq meters
 x = linspace(0, 30000, 1000);
 
+%% -- Decision 2:
 % -- Option 1: Containerized Guided Drone --
 % Beta Dist: Alpha = 8, Beta = 2. Bounds: 20k to 26k
 alpha1 = 8; beta1 = 2;
@@ -65,3 +66,5 @@ fprintf('Option 2 (Parafoil): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_scaled2, s
 
 % Print Option 3 (Airbag - already known, just formatting for consistency)
 fprintf('Option 3 (Airbag):   Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu3, sigma3);
+
+%% Decision X
