@@ -4,6 +4,43 @@
 % Define the X-axis: Containment Area from 0 to 30,000 sq meters
 x = linspace(0, 30000, 1000);
 
+% Define a square meters per Fibonacci score value that can be used in containment area PDFs
+CAslope = 880;
+
+%% -- DECISION 1: LOADING METHOD -- %%
+
+% -- Option 1: Self-Propelled Drive-On
+% Normal Dist: Low impact on max potential containment area; some variability
+mu_d1_o1_area = 26000 - CAslope * 1; sigma_d1_o1_area = CAslope * 2;
+y_d1_o1_area = normpdf(x, mu_d1_o1_area, sigma_d1_o1_area);
+
+% -- Option 2: Containerized Module
+% Normal Dist: Low impact on max potential containment area; low variability
+mu_d1_o2_area = 26000 - CAslope * 0; sigma_d1_o2_area = CAslope * 1;
+y_d1_o2_area = normpdf(x, mu_d1_o2_area, sigma_d1_o2_area);
+
+% -- Option 3: Dedicated Ground Loader
+% Normal Dist: Low impact on max potential containment area; high variability
+mu_d1_o3_area = 26000 - CAslope * 2; sigma_d1_o3_area = CAslope * 3;
+y_d1_o3_area = normpdf(x, mu_d1_o3_area, sigma_d1_o3_area);
+
+% -- Plotting D1 
+figure(1);
+plot(x, y_d1_o1_area, 'b', 'LineWidth', 2, 'DisplayName', 'Self Drive-On (Normal)'); hold on;
+plot(x, y_d1_o2_area, 'r', 'LineWidth', 2, 'DisplayName', 'Containerized (Normal)');
+plot(x, y_d1_o3_area, 'g', 'LineWidth', 2, 'DisplayName', 'Ground Loader (Normal)');
+title('Containment Area PDFs (D1: Loading Method)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D1 Math Printout for Table (Normal distributions)
+fprintf('\n--- D1 Containment Statistics (For Table) ---\n');
+fprintf('Option 1 (Self Drive-On): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o1_area, sigma_d1_o1_area);
+fprintf('Option 2 (Containerized): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o2_area, sigma_d1_o2_area);
+fprintf('Option 3 (Ground Loader): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d1_o3_area, sigma_d1_o3_area);
+
 %% -- DECISION 2: INSERTION METHOD CONTAINMENT -- %%
 
 % -- Option 1: Containerized Guided Drone 
@@ -32,7 +69,7 @@ mu3 = 14000; sigma3 = 4000;
 y3 = normpdf(x, mu3, sigma3);
 
 % -- Plotting D2 
-figure(1);
+figure(2);
 plot(x, y1, 'b', 'LineWidth', 2, 'DisplayName', 'Guided Drone (Beta)'); hold on;
 plot(x, y2, 'r', 'LineWidth', 2, 'DisplayName', 'Parafoil (Beta)');
 plot(x, y3, 'g', 'LineWidth', 2, 'DisplayName', 'Airbag (Normal)');
@@ -86,7 +123,7 @@ x_norm6(x_norm6 < 0 | x_norm6 > 1) = NaN;
 y6 = betapdf(x_norm6, alpha6, beta6) / (b6 - a6);
 
 % -- Plotting D7 
-figure(2);
+figure(3);
 plot(x, y4, 'Color', [0.00, 0.25, 0.45], 'LineWidth', 2.5, 'DisplayName', 'Per-Robot SATCOM (Beta)'); hold on;
 plot(x, y5, 'Color', [0.85, 0.33, 0.10], 'LineWidth', 2.5, 'DisplayName', 'Ground Node RF (Triangular)');
 plot(x, y6, 'Color', [0.00, 0.60, 0.65], 'LineWidth', 2.5, 'DisplayName', 'Airborne Relay (Beta)');
