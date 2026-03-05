@@ -89,6 +89,40 @@ var_std2 = (alpha2 * beta2) / ((alpha2 + beta2)^2 * (alpha2 + beta2 + 1));
 fprintf('Option 2 (Parafoil): Mu = %.0f m^2 | Sigma = %.0f m^2\n', a2 + (mu_std2 * (b2 - a2)), sqrt(var_std2 * (b2 - a2)^2));
 fprintf('Option 3 (Airbag):   Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu3, sigma3);
 
+%% -- DECISION 3: LANDING ACTIVATION -- %%
+
+% -- Option 1: Impact-Triggered Auto Activation
+% Normal Dist: Lowest impact on max potential containment area; mid variability
+mu_d3_o1_area = 26000 - CAslope * 0; sigma_d3_o1_area = CAslope * 2;
+y_d3_o1_area = normpdf(x, mu_d3_o1_area, sigma_d3_o1_area);
+
+% -- Option 2: Remote Commanded Activation
+% Normal Dist: Most impact on max potential containment area; low variability
+mu_d3_o2_area = 26000 - CAslope * 2; sigma_d3_o2_area = CAslope * 1;
+y_d3_o2_area = normpdf(x, mu_d3_o2_area, sigma_d3_o2_area);
+
+% -- Option 3: Dual Key Auto & Remote Activation
+% Normal Dist: Low impact on max potential containment area; most variability
+mu_d3_o3_area = 26000 - CAslope * 1; sigma_d3_o3_area = CAslope * 3;
+y_d3_o3_area = normpdf(x, mu_d3_o3_area, sigma_d3_o3_area);
+
+% -- Plotting D3 
+figure(3);
+plot(x, y_d3_o1_area, 'b', 'LineWidth', 2, 'DisplayName', 'Auto Acivate (Normal)'); hold on;
+plot(x, y_d3_o2_area, 'r', 'LineWidth', 2, 'DisplayName', 'Remote Activate (Normal)');
+plot(x, y_d3_o3_area, 'g', 'LineWidth', 2, 'DisplayName', 'Dual Key Activate (Normal)');
+title('Containment Area PDFs (D3: Landing Activation)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D3 Math Printout for Table (Normal distributions)
+fprintf('\n--- D3 Containment Statistics (For Table) ---\n');
+fprintf('Option 1 (Auto Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o1_area, sigma_d3_o1_area);
+fprintf('Option 2 (Remote Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o2_area, sigma_d3_o2_area);
+fprintf('Option 3 (Dual Key Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d3_o3_area, sigma_d3_o3_area);
+
 %% -- DECISION 7: COMMUNICATIONS CONTAINMENT -- %%
 
 % -- Option 1: Per-Robot SATCOM
@@ -123,7 +157,7 @@ x_norm6(x_norm6 < 0 | x_norm6 > 1) = NaN;
 y6 = betapdf(x_norm6, alpha6, beta6) / (b6 - a6);
 
 % -- Plotting D7 
-figure(3);
+figure(4);
 plot(x, y4, 'Color', [0.00, 0.25, 0.45], 'LineWidth', 2.5, 'DisplayName', 'Per-Robot SATCOM (Beta)'); hold on;
 plot(x, y5, 'Color', [0.85, 0.33, 0.10], 'LineWidth', 2.5, 'DisplayName', 'Ground Node RF (Triangular)');
 plot(x, y6, 'Color', [0.00, 0.60, 0.65], 'LineWidth', 2.5, 'DisplayName', 'Airborne Relay (Beta)');
