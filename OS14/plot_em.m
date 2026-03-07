@@ -1,5 +1,6 @@
 % EM.413 OS14 Question 1 Decision Aid
 % Allows manipulation and visualization of Contianment (Performance) PDFs for OS14 Q1
+close all; clear all; clc;
 
 % Define the X-axis: Containment Area from 0 to 30,000 sq meters
 x = linspace(0, 30000, 1000);
@@ -176,3 +177,123 @@ fprintf('Option 2 (Ground):   Mu = %.0f m^2 | Sigma = %.0f m^2 (Note: Tri mean i
 mu_std6 = alpha6 / (alpha6 + beta6);
 var_std6 = (alpha6 * beta6) / ((alpha6 + beta6)^2 * (alpha6 + beta6 + 1));
 fprintf('Option 3 (Airborne): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', a6 + (mu_std6 * (b6 - a6)), sqrt(var_std6 * (b6 - a6)^2));
+
+%% -- DECISION 8: AUTONOMY MODE CONTAINMENT -- %%
+% -- Option 1: Teleoperation (Normal: Human bottleneck)
+mu_d8_o1_area = 16000; sigma_d8_o1_area = 3000;
+y_d8_o1_area = normpdf(x, mu_d8_o1_area, sigma_d8_o1_area);
+
+% -- Option 2: Supervised Autonomy (Normal: Better, but still human-limited)
+mu_d8_o2_area = 21000; sigma_d8_o2_area = 1500;
+y_d8_o2_area = normpdf(x, mu_d8_o2_area, sigma_d8_o2_area);
+
+% -- Option 3: Coordinated Autonomy (Beta: High peak, vulnerable to edge cases)
+alpha8_3 = 6; beta8_3 = 2; a8_3 = 12000; b8_3 = 26000;
+x_norm8_3 = (x - a8_3) / (b8_3 - a8_3);
+x_norm8_3(x_norm8_3 < 0 | x_norm8_3 > 1) = NaN;
+y_d8_o3_area = betapdf(x_norm8_3, alpha8_3, beta8_3) / (b8_3 - a8_3);
+
+% -- Plotting D8 Containment --
+figure(9);
+plot(x, y_d8_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', 'Teleoperation (Normal)'); hold on;
+plot(x, y_d8_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', 'Supervised (Normal)');
+plot(x, y_d8_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', 'Coordinated (Beta)');
+title('Containment Area PDFs (D8: Autonomy Mode)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f');
+
+% -- D8 Math Printout --
+fprintf('\n--- D8 Statistics (For Table) ---\n');
+fprintf('Containment:\n');
+fprintf('Option 1 (Teleop): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d8_o1_area, sigma_d8_o1_area);
+fprintf('Option 2 (Super):  Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d8_o2_area, sigma_d8_o2_area);
+mu_std8_3 = alpha8_3 / (alpha8_3 + beta8_3);
+var_std8_3 = (alpha8_3 * beta8_3) / ((alpha8_3 + beta8_3)^2 * (alpha8_3 + beta8_3 + 1));
+fprintf('Option 3 (Coord):  Mu = %.0f m^2 | Sigma = %.0f m^2\n', a8_3 + (mu_std8_3 * (b8_3 - a8_3)), sqrt(var_std8_3 * (b8_3 - a8_3)^2));
+
+%% -- DECISION 9: RECOVERY METHOD CONTAINMENT -- %%
+% Modeled based on "Bingo Fuel" / Battery Reserve constraints.
+% Normal distributions are shifted to respect the 26,000 m^2 absolute ceiling.
+
+% -- Option 1: Expendable (No Recovery)
+% 100% battery to the mission. 3-sigma tail hits 26,000.
+mu_d9_o1_area = 24800; sigma_d9_o1_area = 400;
+y_d9_o1_area = normpdf(x, mu_d9_o1_area, sigma_d9_o1_area);
+
+% -- Option 2: Manual Ground Retrieval
+% Minor battery reserve required. 
+mu_d9_o2_area = 22000; sigma_d9_o2_area = 1000;
+y_d9_o2_area = normpdf(x, mu_d9_o2_area, sigma_d9_o2_area);
+
+% -- Option 3: Air-based Recovery
+% Minor battery reserve required.
+mu_d9_o3_area = 22000; sigma_d9_o3_area = 1000;
+y_d9_o3_area = normpdf(x, mu_d9_o3_area, sigma_d9_o3_area);
+
+% -- Plotting D9 
+figure(5);
+plot(x, y_d9_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', 'Expendable'); hold on;
+plot(x, y_d9_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', 'Ground Retrieval');
+plot(x, y_d9_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', 'Air-based Recovery');
+
+title('Containment Area PDFs (D9: Recovery Method)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D9 Math Printout for Table --
+fprintf('\n--- D9 Containment Statistics (For Table) ---\n');
+fprintf('Option 1 (Expendable): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d9_o1_area, sigma_d9_o1_area);
+fprintf('Option 2 (Ground):     Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d9_o2_area, sigma_d9_o2_area);
+fprintf('Option 3 (Auto):       Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d9_o3_area, sigma_d9_o3_area);
+
+%% -- DECISION 10: ENCAPSULATION METHOD CONTAINMENT (BETA UPDATE) -- %%
+% Modeled to allow all options to hit the 26,000 m^2 absolute ceiling, 
+% but with varying probabilities and worst-case bounds.
+
+% -- Option 1: Bare Robot (Wide spread, lower probability of max)
+alpha10_1 = 3; beta10_1 = 2; a10_1 = 15000; b10_1 = 26000;
+x_norm10_1 = (x - a10_1) / (b10_1 - a10_1); 
+x_norm10_1(x_norm10_1 < 0 | x_norm10_1 > 1) = NaN; 
+y_d10_o1_area = betapdf(x_norm10_1, alpha10_1, beta10_1) / (b10_1 - a10_1);
+
+% -- Option 2: Individual Pods (Tighter spread, better probability)
+alpha10_2 = 5; beta10_2 = 2; a10_2 = 20000; b10_2 = 26000;
+x_norm10_2 = (x - a10_2) / (b10_2 - a10_2); 
+x_norm10_2(x_norm10_2 < 0 | x_norm10_2 > 1) = NaN; 
+y_d10_o2_area = betapdf(x_norm10_2, alpha10_2, beta10_2) / (b10_2 - a10_2);
+
+% -- Option 3: Containerized Module (Highest probability of max)
+alpha10_3 = 8; beta10_3 = 2; a10_3 = 24000; b10_3 = 26000;
+x_norm10_3 = (x - a10_3) / (b10_3 - a10_3); 
+x_norm10_3(x_norm10_3 < 0 | x_norm10_3 > 1) = NaN; 
+y_d10_o3_area = betapdf(x_norm10_3, alpha10_3, beta10_3) / (b10_3 - a10_3);
+
+% -- Plotting D10 Containment --
+figure(7);
+plot(x, y_d10_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', 'Bare Robot (Beta)'); hold on;
+plot(x, y_d10_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', 'Individual Pods (Beta)');
+plot(x, y_d10_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', 'Containerized Module (Beta)');
+
+title('Containment Area PDFs (D10: Encapsulation Method)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D10 Math Printout --
+fprintf('\n--- D10 Containment Statistics (For Table) ---\n');
+mu_std10_1 = alpha10_1 / (alpha10_1 + beta10_1);
+var_std10_1 = (alpha10_1 * beta10_1) / ((alpha10_1 + beta10_1)^2 * (alpha10_1 + beta10_1 + 1));
+fprintf('Option 1 (Bare):   Mu = %.0f m^2 | Sigma = %.0f m^2\n', a10_1 + (mu_std10_1 * (b10_1 - a10_1)), sqrt(var_std10_1 * (b10_1 - a10_1)^2));
+
+mu_std10_2 = alpha10_2 / (alpha10_2 + beta10_2);
+var_std10_2 = (alpha10_2 * beta10_2) / ((alpha10_2 + beta10_2)^2 * (alpha10_2 + beta10_2 + 1));
+fprintf('Option 2 (Indiv):  Mu = %.0f m^2 | Sigma = %.0f m^2\n', a10_2 + (mu_std10_2 * (b10_2 - a10_2)), sqrt(var_std10_2 * (b10_2 - a10_2)^2));
+
+mu_std10_3 = alpha10_3 / (alpha10_3 + beta10_3);
+var_std10_3 = (alpha10_3 * beta10_3) / ((alpha10_3 + beta10_3)^2 * (alpha10_3 + beta10_3 + 1));
+fprintf('Option 3 (Module): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', a10_3 + (mu_std10_3 * (b10_3 - a10_3)), sqrt(var_std10_3 * (b10_3 - a10_3)^2));
