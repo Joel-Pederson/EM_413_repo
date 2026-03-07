@@ -8,39 +8,45 @@ x = linspace(0, 30000, 1000);
 % Define a square meters per Fibonacci score value that can be used in containment area PDFs
 CAslope = 880;
 
-%% -- DECISION 1: LOADING METHOD -- %%
+%% -- DECISION 1: LOADING METHOD CONTAINMENT -- %%
+% Modeled based on CAslope = 880 logic. 
+% Shifted using 3-sigma rule to respect the 26,000 m^2 absolute ceiling.
 
 % -- Option 1: Self-Propelled Drive-On
-% Normal Dist: Low impact on max potential containment area; some variability
-mu_d1_o1_area = 26000 - CAslope * 1; sigma_d1_o1_area = CAslope * 2;
+% Moderate variance, slight delay penalty (CAslope * 1)
+sigma_d1_o1_area = CAslope * 2;
+mu_d1_o1_area = 26000 - (3 * sigma_d1_o1_area) - (CAslope * 1);
 y_d1_o1_area = normpdf(x, mu_d1_o1_area, sigma_d1_o1_area);
 
 % -- Option 2: Containerized Module
-% Normal Dist: Low impact on max potential containment area; low variability
-mu_d1_o2_area = 26000 - CAslope * 0; sigma_d1_o2_area = CAslope * 1;
+% Lowest variance, zero delay penalty (touches max ceiling)
+sigma_d1_o2_area = CAslope * 1;
+mu_d1_o2_area = 26000 - (3 * sigma_d1_o2_area) - (CAslope * 0);
 y_d1_o2_area = normpdf(x, mu_d1_o2_area, sigma_d1_o2_area);
 
 % -- Option 3: Dedicated Ground Loader
-% Normal Dist: Low impact on max potential containment area; high variability
-mu_d1_o3_area = 26000 - CAslope * 2; sigma_d1_o3_area = CAslope * 3;
+% Highest variance, highest delay penalty (CAslope * 2)
+sigma_d1_o3_area = CAslope * 3;
+mu_d1_o3_area = 26000 - (3 * sigma_d1_o3_area) - (CAslope * 2);
 y_d1_o3_area = normpdf(x, mu_d1_o3_area, sigma_d1_o3_area);
 
-% -- Plotting D1 
+% -- Plotting D1 Containment --
 figure(1);
-plot(x, y_d1_o1_area, 'b', 'LineWidth', 2, 'DisplayName', 'Self Drive-On (Normal)'); hold on;
-plot(x, y_d1_o2_area, 'r', 'LineWidth', 2, 'DisplayName', 'Containerized (Normal)');
-plot(x, y_d1_o3_area, 'g', 'LineWidth', 2, 'DisplayName', 'Ground Loader (Normal)');
+plot(x, y_d1_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', 'Self Drive-On'); hold on;
+plot(x, y_d1_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', 'Containerized');
+plot(x, y_d1_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', 'Ground Loader');
+
 title('Containment Area PDFs (D1: Loading Method)');
 xlabel('Containment Area (m^2)'); ylabel('Probability Density');
 legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
 ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
 xtickformat('%,.0f'); ytickformat('%.5f'); 
 
-% -- D1 Math Printout for Table (Normal distributions)
-fprintf('\n--- D1 Containment Statistics (For Table) ---\n');
-fprintf('Option 1 (Self Drive-On): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o1_area, sigma_d1_o1_area);
-fprintf('Option 2 (Containerized): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o2_area, sigma_d1_o2_area);
-fprintf('Option 3 (Ground Loader): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d1_o3_area, sigma_d1_o3_area);
+fprintf('\n--- D1 Statistics (For Table) ---\n');
+fprintf('Containment (Area):\n');
+fprintf('Option 1 (Drive-On):  Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o1_area, sigma_d1_o1_area);
+fprintf('Option 2 (Container): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o2_area, sigma_d1_o2_area);
+fprintf('Option 3 (Loader):    Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d1_o3_area, sigma_d1_o3_area);
 
 %% -- DECISION 2: INSERTION METHOD CONTAINMENT -- %%
 
@@ -123,6 +129,90 @@ fprintf('\n--- D3 Containment Statistics (For Table) ---\n');
 fprintf('Option 1 (Auto Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o1_area, sigma_d3_o1_area);
 fprintf('Option 2 (Remote Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o2_area, sigma_d3_o2_area);
 fprintf('Option 3 (Dual Key Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d3_o3_area, sigma_d3_o3_area);
+
+%% -- DECISION 4: FLEET COMPOSITION CONTAINMENT -- %%
+% -- Option 1: Homogeneous (Reliable but slower)
+mu_d4_o1_area = 23000; sigma_d4_o1_area = 1000;
+y_d4_o1_area = normpdf(x, mu_d4_o1_area, sigma_d4_o1_area);
+
+% -- Option 2: Two-tier (Good tactical synergy)
+mu_d4_o2_area = 24500; sigma_d4_o2_area = 500;
+y_d4_o2_area = normpdf(x, mu_d4_o2_area, sigma_d4_o2_area);
+
+% -- Option 3: Three-role (Perfect specialization)
+mu_d4_o3_area = 25100; sigma_d4_o3_area = 300;
+y_d4_o3_area = normpdf(x, mu_d4_o3_area, sigma_d4_o3_area);
+
+% -- Plotting D4 Containment --
+figure(17);
+plot(x, y_d4_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', 'Homogeneous'); hold on;
+plot(x, y_d4_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', 'Two-Tier');
+plot(x, y_d4_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', 'Three-Role');
+
+title('Containment Area PDFs (D4: Fleet Composition)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D4 Math Printout --
+fprintf('\n--- D4 Statistics (For Table) ---\n');
+fprintf('Containment:\n');
+fprintf('Option 1 (Homogeneous):   Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d4_o1_area, sigma_d4_o1_area);
+fprintf('Option 2 (2-Tier): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d4_o2_area, sigma_d4_o2_area);
+fprintf('Option 3 (3-Role): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d4_o3_area, sigma_d4_o3_area);
+
+%% -- DECISION 5: REPLACEMENT RATIO CONTAINMENT (Autonomy Proficiency) -- %%
+% -- Option 1: 1:1 (High proficiency, high efficiency)
+mu_d5_o1_area = 25000; sigma_d5_o1_area = 350;
+y_d5_o1_area = normpdf(x, mu_d5_o1_area, sigma_d5_o1_area);
+
+% -- Option 2: 3:1 (Moderate proficiency, some swarm friction)
+mu_d5_o2_area = 18000; sigma_d5_o2_area = 2000;
+y_d5_o2_area = normpdf(x, mu_d5_o2_area, sigma_d5_o2_area);
+
+% -- Option 3: 6:1 (Low proficiency, high swarm friction)
+mu_d5_o3_area = 10000; sigma_d5_o3_area = 3000;
+y_d5_o3_area = normpdf(x, mu_d5_o3_area, sigma_d5_o3_area);
+
+% -- Plotting D5 Containment --
+figure(13);
+plot(x, y_d5_o1_area, 'b', 'LineWidth', 2.5, 'DisplayName', '1:1 (High Proficiency)'); hold on;
+plot(x, y_d5_o2_area, 'r', 'LineWidth', 2.5, 'DisplayName', '3:1 (Mod Proficiency)');
+plot(x, y_d5_o3_area, 'g', 'LineWidth', 2.5, 'DisplayName', '6:1 (Low Proficiency)');
+
+title('Containment Area PDFs (D5: Autonomy Proficiency Ratio)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+fprintf('\n--- D5 Statistics (For Table) ---\n');
+fprintf('Containment (Area):\n');
+fprintf('Option 1 (1:1): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d5_o1_area, sigma_d5_o1_area);
+fprintf('Option 2 (3:1): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d5_o2_area, sigma_d5_o2_area);
+fprintf('Option 3 (6:1): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d5_o3_area, sigma_d5_o3_area);
+
+%% -- DECISION 6: DEPLOYMENT AIRCRAFT TYPE -- %%
+% Note: Down-selected to A400M due to Airbus stakeholder constraint.
+% Acts as a system baseline for all Monte Carlo architectures.
+
+% -- Containment (Highly reliable baseline delivery) --
+mu_d6_o1_area = 25500; sigma_d6_o1_area = 150;
+y_d6_o1_area = normpdf(x, mu_d6_o1_area, sigma_d6_o1_area);
+
+figure(11);
+plot(x, y_d6_o1_area, 'Color', [0.49, 0.18, 0.56], 'LineWidth', 2.5, 'DisplayName', 'A400M Baseline');
+title('Containment Area PDFs (D6: Deployment Aircraft)');
+xlabel('Containment Area (m^2)'); ylabel('Probability Density');
+legend('Location', 'NorthWest'); grid on; xlim([0 30000]);
+ax = gca; ax.XAxis.Exponent = 0; ax.YAxis.Exponent = 0;
+xtickformat('%,.0f'); ytickformat('%.5f'); 
+
+% -- D6 Math Printout --
+fprintf('\n--- D6 Statistics (For Table) ---\n');
+fprintf('Containment:\n');
+fprintf('Option 1 (A400M): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d6_o1_area, sigma_d6_o1_area);
 
 %% -- DECISION 7: COMMUNICATIONS CONTAINMENT -- %%
 
