@@ -351,6 +351,15 @@ mu_std10_3 = alpha10_3 / (alpha10_3 + beta10_3);
 var_std10_3 = (alpha10_3 * beta10_3) / ((alpha10_3 + beta10_3)^2 * (alpha10_3 + beta10_3 + 1));
 fprintf('Option 3 (Module): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', a10_3 + (mu_std10_3 * (b10_3 - a10_3)), sqrt(var_std10_3 * (b10_3 - a10_3)^2));
 
+%% ==================================================================
+%% END OF Q1 — PDFs for Architectural Decisions (Containment & Cost)
+%% ==================================================================
+
+
+%% ==================================================================
+%% Q2 — Monte Carlo Simulation and Tradespace with Uncertainty
+%% ==================================================================
+
 %% Q2 FIBONACCI LOOKUP TABLE (from OS13 matrix)
 % Decision | Option1 score | Option2 score | Option3 score
 fib_table.D1 = [2, 3, 1];   % Self-Propelled, Containerized, Ground Loader
