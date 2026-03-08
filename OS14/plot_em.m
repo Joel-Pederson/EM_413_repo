@@ -905,8 +905,6 @@ hold on;
 % Historical Design of Reference (Smokejumpers)
 hist_cost = 1.5;
 hist_contain = 8094;
-plot(hist_cost, hist_contain, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k', 'DisplayName', 'Historical Ref');
-text(hist_cost + 0.1, hist_contain, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 
 % --- DYNAMIC PARETO FRONT ALGORITHM ---
 % Pool all data points including the historical baseline
@@ -951,6 +949,10 @@ ylabel('Wildfire Containment Area (m²)');
 grid on;
 xlim([-0.5 max(mean_cost/1e6) + 1.5]); 
 ylim([8000 28000]);
+
+% Plot Historical Design of Reference (Smokejumpers)
+plot(hist_cost, hist_contain, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k', 'DisplayName', 'Historical Ref');
+text(hist_cost + 0.1, hist_contain, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 
 % Call the legend (it will automatically grab all 'DisplayName' tags)
 legend('Location','northwest');
