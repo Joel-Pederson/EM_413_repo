@@ -3,3 +3,4 @@
 # Ignore macOS system files
 .DS_Store
 *.DS_Store
+OS14/Simulation_Results.xlsx
