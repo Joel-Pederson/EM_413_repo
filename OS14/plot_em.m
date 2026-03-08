@@ -316,7 +316,7 @@ fprintf('Option 3 (Coord):  Mu = %.0f m^2 | Sigma = %.0f m^2\n', a8_3 + (mu_std8
 
 % -- Option 1: Manual Ground Retrieval
 % Minor battery reserve required. 
-mu_d9_o1_area = 22000; sigma_d9_o1_area = 1000;
+mu_d9_o1_area = 23000; sigma_d9_o1_area = 1000;
 y_d9_o1_area = normpdf(x, mu_d9_o1_area, sigma_d9_o1_area);
 
 % -- Option 2: Expendable (No Recovery)
@@ -326,7 +326,7 @@ y_d9_o2_area = normpdf(x, mu_d9_o2_area, sigma_d9_o2_area);
 
 % -- Option 3: Air-based Recovery
 % Minor battery reserve required.
-mu_d9_o3_area = 22000; sigma_d9_o3_area = 1000;
+mu_d9_o3_area = 22000; sigma_d9_o3_area = 1500;
 y_d9_o3_area = normpdf(x, mu_d9_o3_area, sigma_d9_o3_area);
 
 % -- Plotting D9 
@@ -611,7 +611,7 @@ legend('Location', 'NorthEast'); grid on; xlim([0 50000]);
 figure(110);
 plot(x_cost9_mult, y_d9_o2_mult, 'b', 'LineWidth', 2, 'DisplayName', 'Expendable');
 title('Cost Multiplier PDF (D9: Recovery Method)'); xlabel('Hardware Multiplier'); ylabel('Density');
-legend('Location', 'NorthEast'); grid on; xlim([0 2]);
+legend('Location', 'NorthEast'); grid on; xlim([0.0 2.0]);
 
 fprintf('\n--- D9 Cost Statistics ---\n');
 fprintf('Option 1 (Ground):  Mu = %.1fx | Sigma = %.2fx (Mult)\n', mu_d9_o1_cost, sigma_d9_o1_cost);
@@ -947,7 +947,7 @@ title('Tradespace: Wildfire Containment Area vs. System Cost (Monte Carlo Uncert
 xlabel('System Cost [Purchase + Cost of Operation] ($ millions)');
 ylabel('Wildfire Containment Area (m²)');
 grid on;
-xlim([-0.5 max(mean_cost/1e6) + 1.5]); 
+xlim([-0.5 max(mean_cost/1e6) + 2.5]); 
 ylim([8000 28000]);
 
 % Plot Historical Design of Reference (Smokejumpers)
@@ -955,7 +955,7 @@ plot(hist_cost, hist_contain, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5
 text(hist_cost + 0.1, hist_contain, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 
 % Call the legend (it will automatically grab all 'DisplayName' tags)
-legend('Location','northwest');
+legend('Location','northeast');
 set(gca, 'FontSize',12);
 
 ax = gca;
