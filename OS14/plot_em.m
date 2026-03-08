@@ -731,7 +731,7 @@ end
 % Save the user's current RNG state so we don't mess up their future work
 original_rng_state = rng; 
 rng(1); % Lock the seed to 1 for perfectly repeatable Monte Carlo draws
-nTrials = 10000;
+nTrials = 10000; %Draw 10,000 times
 
 % Helper function to draw a random number from a Triangular Distribution
 tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b - a)) + ...
@@ -759,9 +759,13 @@ for i = 1:nTrials
                  (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
                  normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
                  (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
-                 
+    % Aggregate weighted area contributions from multiple components using random draws
+
     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    % Hardware cost as product of two positive random costs
+
     attr = 0; % Air-based recovery (no hardware penalty)
+    % Operations cost: sum of positive random and triangular samples across stages
     ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
@@ -1064,7 +1068,7 @@ for i = 1:length(sorted_costs)
 end
 % Connect the dominant designs with straight lines
 plot(pareto_x, pareto_y, '-o', 'Color', [1 0.65 0], 'LineWidth', 3.5, 'MarkerSize', 8, 'MarkerFaceColor', [1 0.65 0], 'DisplayName', 'Pareto Front');
-% ----------------------------------------
+
 % Concept Labels (Updated to match OS13 Matrix)
 labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', 'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area'};
 for i = 1:7
@@ -1097,5 +1101,5 @@ writecell(decisions_data, filename, 'Sheet', 'Decisions');
 % Write associated concept data to a separate sheet
 writecell(concepts_data, filename, 'Sheet', 'Concepts');
 
-% CLEANUP: Restore the original RNG state
+% Restore the original RNG state
 rng(original_rng_state);
