@@ -1,5 +1,5 @@
-% EM.413 OS14 Question 1 Decision Aid
-% Allows manipulation and visualization of Contianment (Performance) PDFs for OS14 Q1
+% EM.413 OS14 
+% Allows manipulation and visualization of Contianment (Performance) PDFs for OS14 Q1 and Q2
 close all; clear all; clc;
 
 % Define the X-axis: Containment Area from 0 to 30,000 sq meters
@@ -7,6 +7,8 @@ x = linspace(0, 30000, 1000);
 
 % Define a square meters per Fibonacci score value that can be used in containment area PDFs
 CAslope = 880;
+
+%% -- Question 1 Decision Aid -- %%
 
 %% %%%% -- CONTAINMENT -- %%%% %%
 
@@ -663,264 +665,262 @@ for k = 1:numel(fields)
     end
 end
 
-%% Q2 MONTE CARLO - Containment Area Only (Weighted by Fibonacci)
+%% Q2 MONTE CARLO TRADESPACE SIMULATION (Containment & Cost)
 
 % Save the user's current RNG state so we don't mess up their future work
-original_rng_state = rng;
-% Lock the seed to 1 for perfectly repeatable Monte Carlo draws
-rng(1); 
-
+original_rng_state = rng; 
+rng(1); % Lock the seed to 1 for perfectly repeatable Monte Carlo draws
 nTrials = 10000;
-fprintf('\n=== Q2 Monte Carlo Results (Weighted Containment Area) ===\n');
+fprintf('\n=== Q2 Monte Carlo Results (10,000 Iterations/Concept) ===\n');
 
-% Helper anonymous function to draw a random number from a Triangular Distribution
-% U is a random number between 0 and 1. It uses inverse transform sampling.
+% Helper function to draw a random number from a Triangular Distribution
 tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b - a)) + ...
                      (b - sqrt((1 - rand()) * (b - a) * (b - c)) - a) * (rand() >= (c - a)/(b - a));
 
-% ==================================================================
-% Concept 1 (High Precision, High Performance, Max Autonomy)
-contain_samples = zeros(nTrials,1);
-for i = 1:nTrials
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o1_area, sigma_d1_o1_area) * (fib_table.D1(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha2,beta2)*(b2-a2)+a2) * (fib_table.D2(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o1_area, sigma_d3_o1_area) * (fib_table.D3(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o1_area, sigma_d4_o1_area) * (fib_table.D4(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha4,beta4)*(b4-a4)+a4) * (fib_table.D7(1) / max_fib_sum); % D7 Opt 1 is Beta
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3) * (fib_table.D8(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o3_area, sigma_d9_o3_area) * (fib_table.D9(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
-end
-mean_C1 = mean(contain_samples);
-std_C1  = std(contain_samples);
-fprintf('Concept 1: Mean = %.0f m² | Std = %.0f m²\n', mean_C1, std_C1);
+% Helper function to prevent negative costs from high-variance options
+pos = @(x) max(0, x); 
+
+% Preallocate Data Arrays
+mean_contain = zeros(1,7); std_contain = zeros(1,7);
+mean_cost = zeros(1,7); std_cost = zeros(1,7);
 
 % ==================================================================
-% Concept 2 (High Precision, Low Autonomy, Low Performance)
-contain_samples = zeros(nTrials,1);
+% CONCEPT 1: High Precision, High Performance, Max Autonomy
+% D1o1, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o3, D10o3
+% Preallocate samples for containment area and cost across trials
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o2_area, sigma_d1_o2_area) * (fib_table.D1(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha2,beta2)*(b2-a2)+a2) * (fib_table.D2(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o2_area, sigma_d3_o2_area) * (fib_table.D3(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o3_area, sigma_d4_o3_area) * (fib_table.D4(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha6,beta6)*(b6-a6)+a6) * (fib_table.D7(3) / max_fib_sum); % D7 Opt 3 is Beta
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o1_area, sigma_d8_o1_area) * (fib_table.D8(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o2_area, sigma_d9_o2_area) * (fib_table.D9(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
+    % Containment Draw - weighted random contributions from fiber table components
+    ca_samp(i) = normrnd(mu_d1_o1_area, sigma_d1_o1_area)*(fib_table.D1(1)/max_fib_sum) + ...
+                 (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
+                 normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
+                 normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
+                 normrnd(mu_d5_o1_area, sigma_d5_o1_area)*(fib_table.D5(1)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha4,beta4)*(b4-a4)+a4)*(fib_table.D7(1)/max_fib_sum) + ...
+                 (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
+                 normrnd(mu_d9_o3_area, sigma_d9_o3_area)*(fib_table.D9(3)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+    % Cost Draw - separate hardware and operations cost components
+    hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    % Sum operational costs from multiple stochastic sources (ensures nonnegative via pos)
+    ops = pos(normrnd(mu_d1_o1_cost, sigma_d1_o1_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
+          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
+          pos(normrnd(mu_d9_o3_cost, sigma_d9_o3_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+    c_samp(i) = hw + ops;
 end
-mean_C2 = mean(contain_samples);
-std_C2  = std(contain_samples);
-fprintf('Concept 2: Mean = %.0f m² | Std = %.0f m²\n', mean_C2, std_C2);
+% Aggregate statistics for concept 1
+mean_contain(1) = mean(ca_samp); std_contain(1) = std(ca_samp);
+mean_cost(1) = mean(c_samp); std_cost(1) = std(c_samp);
+fprintf('Concept 1 (Max Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(1), mean_cost(1));
 
 % ==================================================================
-% Concept 3 (High Precision, Medium Autonomy, Medium Performance)
-contain_samples = zeros(nTrials,1);
+% CONCEPT 2: High Precision, Low Autonomy, Low Performance
+% D1o2, D2o2, D3o2, D4o3, D5o1, D6o1, D7o3, D8o1, D9o2, D10o3
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o2_area, sigma_d1_o2_area) * (fib_table.D1(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha2,beta2)*(b2-a2)+a2) * (fib_table.D2(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o3_area, sigma_d3_o3_area) * (fib_table.D3(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o2_area, sigma_d4_o2_area) * (fib_table.D4(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o2_area, sigma_d5_o2_area) * (fib_table.D5(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + tri_rnd(a_tri, c_tri, b_tri) * (fib_table.D7(2) / max_fib_sum); % D7 Opt 2 is Triangular
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o2_area, sigma_d8_o2_area) * (fib_table.D8(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o2_area, sigma_d9_o2_area) * (fib_table.D9(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
+    ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
+                 (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
+                 normrnd(mu_d3_o2_area, sigma_d3_o2_area)*(fib_table.D3(2)/max_fib_sum) + ...
+                 normrnd(mu_d4_o3_area, sigma_d4_o3_area)*(fib_table.D4(3)/max_fib_sum) + ...
+                 normrnd(mu_d5_o1_area, sigma_d5_o1_area)*(fib_table.D5(1)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha6,beta6)*(b6-a6)+a6)*(fib_table.D7(3)/max_fib_sum) + ...
+                 normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
+                 normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
+    ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
+          pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
+          pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+    c_samp(i) = hw + attr + ops;
 end
-mean_C3 = mean(contain_samples);
-std_C3  = std(contain_samples);
-fprintf('Concept 3: Mean = %.0f m² | Std = %.0f m²\n', mean_C3, std_C3);
+mean_contain(2) = mean(ca_samp); std_contain(2) = std(ca_samp);
+mean_cost(2) = mean(c_samp); std_cost(2) = std(c_samp);
+fprintf('Concept 2 (Low Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(2), mean_cost(2));
 
 % ==================================================================
-% Concept 10 (Smallest Containment Area)
-contain_samples = zeros(nTrials,1);
+% CONCEPT 3: High Precision, Medium Autonomy, Medium Performance
+% D1o2, D2o2, D3o3, D4o2, D5o2, D6o1, D7o2, D8o2, D9o2, D10o3
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o3_area, sigma_d1_o3_area) * (fib_table.D1(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu3, sigma3) * (fib_table.D2(3) / max_fib_sum); % D2 Opt 3 is Normal
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o2_area, sigma_d3_o2_area) * (fib_table.D3(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o3_area, sigma_d4_o3_area) * (fib_table.D4(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o3_area, sigma_d5_o3_area) * (fib_table.D5(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha6,beta6)*(b6-a6)+a6) * (fib_table.D7(3) / max_fib_sum); % D7 Opt 3 is Beta
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o1_area, sigma_d8_o1_area) * (fib_table.D8(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o3_area, sigma_d9_o3_area) * (fib_table.D9(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1) * (fib_table.D10(1) / max_fib_sum);
+    ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
+                 (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
+                 normrnd(mu_d3_o3_area, sigma_d3_o3_area)*(fib_table.D3(3)/max_fib_sum) + ...
+                 normrnd(mu_d4_o2_area, sigma_d4_o2_area)*(fib_table.D4(2)/max_fib_sum) + ...
+                 normrnd(mu_d5_o2_area, sigma_d5_o2_area)*(fib_table.D5(2)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 tri_rnd(a_tri, c_tri, b_tri)*(fib_table.D7(2)/max_fib_sum) + ...
+                 normrnd(mu_d8_o2_area, sigma_d8_o2_area)*(fib_table.D8(2)/max_fib_sum) + ...
+                 normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o2_cost, sigma_d4_o2_cost)) * pos(normrnd(mu_d5_o2_cost, sigma_d5_o2_cost));
+    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
+    ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
+          pos(normrnd(mu_d3_o3_cost, sigma_d3_o3_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_2, c_c7_2, b_c7_2)) + pos(normrnd(mu_d8_o2_cost, sigma_d8_o2_cost)) + ...
+          pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+    c_samp(i) = hw + attr + ops;
 end
-mean_C10 = mean(contain_samples);
-std_C10  = std(contain_samples);
-fprintf('Concept 10: Mean = %.0f m² | Std = %.0f m²\n', mean_C10, std_C10);
+mean_contain(3) = mean(ca_samp); std_contain(3) = std(ca_samp);
+mean_cost(3) = mean(c_samp); std_cost(3) = std(c_samp);
+fprintf('Concept 3 (Med Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(3), mean_cost(3));
 
 % ==================================================================
-% Concept 11 (Largest Containment Area)
-contain_samples = zeros(nTrials,1);
+% CONCEPT 4: Balanced Attritable Swarm
+% D1o1, D2o3, D3o1, D4o3, D5o3, D6o1, D7o2, D8o3, D9o2, D10o2
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o2_area, sigma_d1_o2_area) * (fib_table.D1(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha2,beta2)*(b2-a2)+a2) * (fib_table.D2(2) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o1_area, sigma_d3_o1_area) * (fib_table.D3(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o1_area, sigma_d4_o1_area) * (fib_table.D4(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha4,beta4)*(b4-a4)+a4) * (fib_table.D7(1) / max_fib_sum); % D7 Opt 1 is Beta
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3) * (fib_table.D8(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o1_area, sigma_d9_o1_area) * (fib_table.D9(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
+    ca_samp(i) = normrnd(mu_d1_o1_area, sigma_d1_o1_area)*(fib_table.D1(1)/max_fib_sum) + ...
+                 normrnd(mu3, sigma3)*(fib_table.D2(3)/max_fib_sum) + ...
+                 normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
+                 normrnd(mu_d4_o3_area, sigma_d4_o3_area)*(fib_table.D4(3)/max_fib_sum) + ...
+                 normrnd(mu_d5_o3_area, sigma_d5_o3_area)*(fib_table.D5(3)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 tri_rnd(a_tri, c_tri, b_tri)*(fib_table.D7(2)/max_fib_sum) + ...
+                 (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
+                 normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
+                 (betarnd(alpha10_2,beta10_2)*(b10_2-a10_2)+a10_2)*(fib_table.D10(2)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o3_cost, sigma_d5_o3_cost));
+    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
+    ops = pos(normrnd(mu_d1_o1_cost, sigma_d1_o1_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
+          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_2, c_c7_2, b_c7_2)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
+          pos(normrnd(mu_d10_o2_cost, sigma_d10_o2_cost));
+    c_samp(i) = hw + attr + ops;
 end
-mean_C11 = mean(contain_samples);
-std_C11  = std(contain_samples);
-fprintf('Concept 11: Mean = %.0f m² | Std = %.0f m²\n', mean_C11, std_C11);
-
-%% Q2 COST MONTE CARLO - Full 5 Concepts (RAW SUM - no Fibonacci weighting)
-% Save the user's current RNG state so we don't mess up their future work
-original_rng_state = rng;
-% Lock the seed to 1 for perfectly repeatable Monte Carlo draws
-rng(1); 
-
-nTrials = 10000;
-fprintf('\n=== Q2 Monte Carlo Results (Weighted Containment Area) ===\n');
-
-% Helper anonymous function to draw a random number from a Triangular Distribution
-% U is a random number between 0 and 1. It uses inverse transform sampling.
-tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b - a)) + ...
-                     (b - sqrt((1 - rand()) * (b - a) * (b - c)) - a) * (rand() >= (c - a)/(b - a));
-
+mean_contain(4) = mean(ca_samp); std_contain(4) = std(ca_samp);
+mean_cost(4) = mean(c_samp); std_cost(4) = std(c_samp);
+fprintf('Concept 4 (Bal Swarm): Area = %.0f m² | Cost = $%.0f\n', mean_contain(4), mean_cost(4));
 
 % ==================================================================
-% Concept 1
-cost_samples = zeros(nTrials,1);
+% CONCEPT 5: Heavy Ground Ops
+% D1o3, D2o1, D3o2, D4o1, D5o2, D6o1, D7o1, D8o2, D9o1, D10o1
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o1_cost, sigma_d1_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_1, c_c2_1, b_c2_1);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o1_cost, sigma_d3_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o1_cost, sigma_d4_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_1, c_c7_1, b_c7_1);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o3_cost, sigma_d8_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o3_cost, sigma_d9_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+    ca_samp(i) = normrnd(mu_d1_o3_area, sigma_d1_o3_area)*(fib_table.D1(3)/max_fib_sum) + ...
+                 (betarnd(alpha1,beta1)*(b1-a1)+a1)*(fib_table.D2(1)/max_fib_sum) + ...
+                 normrnd(mu_d3_o2_area, sigma_d3_o2_area)*(fib_table.D3(2)/max_fib_sum) + ...
+                 normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
+                 normrnd(mu_d5_o2_area, sigma_d5_o2_area)*(fib_table.D5(2)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha4,beta4)*(b4-a4)+a4)*(fib_table.D7(1)/max_fib_sum) + ...
+                 normrnd(mu_d8_o2_area, sigma_d8_o2_area)*(fib_table.D8(2)/max_fib_sum) + ...
+                 normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
+                 (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o2_cost, sigma_d5_o2_cost));
+    ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(tri_rnd(a_c2_1, c_c2_1, b_c2_1)) + ...
+          pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o2_cost, sigma_d8_o2_cost)) + ...
+          pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
+    c_samp(i) = hw + ops; % No attritable penalty for ground recovery
 end
-mean_cost_C1 = mean(cost_samples);
-std_cost_C1  = std(cost_samples);
-fprintf('Concept 1 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C1, std_cost_C1);
+mean_contain(5) = mean(ca_samp); std_contain(5) = std(ca_samp);
+mean_cost(5) = mean(c_samp); std_cost(5) = std(c_samp);
+fprintf('Concept 5 (Heavy Ops): Area = %.0f m² | Cost = $%.0f\n', mean_contain(5), mean_cost(5));
 
 % ==================================================================
-% Concept 2
-cost_samples = zeros(nTrials,1);
+% CONCEPT 6 (Formerly 10): Smallest Containment Area
+% D1o3, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o2_cost, sigma_d3_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o3_cost, sigma_d4_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_3, c_c7_3, b_c7_3);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o1_cost, sigma_d8_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o2_cost, sigma_d9_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+    ca_samp(i) = normrnd(mu_d1_o3_area, sigma_d1_o3_area)*(fib_table.D1(3)/max_fib_sum) + ...
+                 normrnd(mu3, sigma3)*(fib_table.D2(3)/max_fib_sum) + ...
+                 normrnd(mu_d3_o2_area, sigma_d3_o2_area)*(fib_table.D3(2)/max_fib_sum) + ...
+                 normrnd(mu_d4_o3_area, sigma_d4_o3_area)*(fib_table.D4(3)/max_fib_sum) + ...
+                 normrnd(mu_d5_o3_area, sigma_d5_o3_area)*(fib_table.D5(3)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha6,beta6)*(b6-a6)+a6)*(fib_table.D7(3)/max_fib_sum) + ...
+                 normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
+                 normrnd(mu_d9_o3_area, sigma_d9_o3_area)*(fib_table.D9(3)/max_fib_sum) + ...
+                 (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o3_cost, sigma_d5_o3_cost));
+    ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
+          pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
+          pos(normrnd(mu_d9_o3_cost, sigma_d9_o3_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
+    c_samp(i) = hw + ops;
 end
-mean_cost_C2 = mean(cost_samples);
-std_cost_C2  = std(cost_samples);
-fprintf('Concept 2 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C2, std_cost_C2);
+mean_contain(6) = mean(ca_samp); std_contain(6) = std(ca_samp);
+mean_cost(6) = mean(c_samp); std_cost(6) = std(c_samp);
+fprintf('Concept 6 (Min Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(6), mean_cost(6));
 
 % ==================================================================
-% Concept 3
-cost_samples = zeros(nTrials,1);
+% CONCEPT 7 (Formerly 11): Largest Containment Area
+% D1o2, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o1, D10o3
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o3_cost, sigma_d3_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o2_cost, sigma_d4_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o2_cost, sigma_d5_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_2, c_c7_2, b_c7_2);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o2_cost, sigma_d8_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o2_cost, sigma_d9_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+    ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
+                 (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
+                 normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
+                 normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
+                 normrnd(mu_d5_o1_area, sigma_d5_o1_area)*(fib_table.D5(1)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha4,beta4)*(b4-a4)+a4)*(fib_table.D7(1)/max_fib_sum) + ...
+                 (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
+                 normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+    hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
+          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
+          pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+    c_samp(i) = hw + ops;
 end
-mean_cost_C3 = mean(cost_samples);
-std_cost_C3  = std(cost_samples);
-fprintf('Concept 3 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C3, std_cost_C3);
+mean_contain(7) = mean(ca_samp); std_contain(7) = std(ca_samp);
+mean_cost(7) = mean(c_samp); std_cost(7) = std(c_samp);
+fprintf('Concept 7 (Max Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(7), mean_cost(7));
 
-% ==================================================================
-% Concept 10
-cost_samples = zeros(nTrials,1);
-for i = 1:nTrials
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o3_cost, sigma_d1_o3_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_1, c_c2_1, b_c2_1);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o2_cost, sigma_d3_o2_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o3_cost, sigma_d4_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o3_cost, sigma_d5_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_3, c_c7_3, b_c7_3);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o1_cost, sigma_d8_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o3_cost, sigma_d9_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o1_cost, sigma_d10_o1_cost);
-end
-mean_cost_C10 = mean(cost_samples);
-std_cost_C10  = std(cost_samples);
-fprintf('Concept 10 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C10, std_cost_C10);
-
-% ==================================================================
-% Concept 11
-cost_samples = zeros(nTrials,1);
-for i = 1:nTrials
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o1_cost, sigma_d3_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o1_cost, sigma_d4_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
-    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_1, c_c7_1, b_c7_1);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o3_cost, sigma_d8_o3_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o1_cost, sigma_d9_o1_cost);
-    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
-end
-mean_cost_C11 = mean(cost_samples);
-std_cost_C11  = std(cost_samples);
-fprintf('Concept 11 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C11, std_cost_C11);
-
-%% Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
-mean_cost   = [mean_cost_C1, mean_cost_C2, mean_cost_C3, mean_cost_C10, mean_cost_C11];
-std_cost    = [std_cost_C1,  std_cost_C2,  std_cost_C3,  std_cost_C10,  std_cost_C11];
-mean_contain = [mean_C1, mean_C2, mean_C3, mean_C10, mean_C11];
-std_contain  = [std_C1,  std_C2,  std_C3,  std_C10,  std_C11];
+%% ==================================================================
+% Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
 
 figure(25); clf;
+% Plot 2D Error Bars (Vertical for area, Horizontal for cost)
 errorbar(mean_cost/1e6, mean_contain, ...
-         2*std_contain, 2*std_contain, ...   % vertical
-         2*std_cost/1e6, 2*std_cost/1e6, ... % horizontal
+         2*std_contain, 2*std_contain, ...   % vertical uncertainty
+         2*std_cost/1e6, 2*std_cost/1e6, ... % horizontal uncertainty
          'o', 'LineStyle','none', 'Color','k', 'LineWidth',2.5, ...
          'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74]);
-
 hold on;
+% Scatter the exact means over the error bars for emphasis
 scatter(mean_cost/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
 
-% Your exact favorite Pareto front (0-6M x-axis, 24,500 at $4.46M)
-x_curve = linspace(0, 6, 200);
-y_curve = interp1([0, 2.0, 2.38, 4.05, 4.46, 6], [0, 9000, 18000, 23500, 24500, 26000], x_curve, 'pchip');
+% Smooth Pareto Front curve (adjust anchors based on your data if necessary)
+x_curve = linspace(0, max(mean_cost/1e6) + 2, 200);
+y_curve = interp1([0, 2.0, 2.38, 4.05, 4.46, max(mean_cost/1e6)+2], [0, 9000, 18000, 23500, 24500, 26000], x_curve, 'pchip');
 plot(x_curve, y_curve, 'Color',[1 0.65 0], 'LineWidth',3.5);
 
-% Labels + Utopia
-labels = {'C1 High-Prec Max Auto', 'C2 High-Prec Low Auto', 'C3 High-Prec Med Auto', ...
-          'C10 Smallest Containment', 'C11 Largest Containment'};
-for i = 1:5
-    text(mean_cost(i)/1e6 + 0.15, mean_contain(i) + 250, labels{i}, 'FontSize',11, 'FontWeight','bold');
-end
-plot(0, 26000, 'p', 'MarkerSize',18, 'MarkerFaceColor',[1 0.84 0]);
-text(0.6, 26500, 'Utopia', 'FontWeight','bold');
+% Historical Design of Reference (Smokejumpers)
+plot(1.5, 12000, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k');
+text(1.6, 12000, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 
+% Concept Labels
+labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Bal Swarm', 'C5 Heavy Ops', 'C10 Min Area', 'C11 Max Area'};
+for i = 1:7
+    text(mean_cost(i)/1e6 + 0.15, mean_contain(i) + 350, labels{i}, 'FontSize',11, 'FontWeight','bold');
+end
+
+% Utopia Point
+plot(0, 26000, 'p', 'MarkerSize',18, 'MarkerFaceColor',[1 0.84 0]);
+text(0.2, 26500, 'Utopia', 'FontWeight','bold');
+
+% Plot Formatting
 title('Tradespace: Wildfire Containment Area vs. System Cost (Monte Carlo Uncertainty)');
 xlabel('System Cost [Purchase + Cost of Operation] ($ millions)');
 ylabel('Wildfire Containment Area (m²)');
 grid on;
-xlim([0 6]);
+xlim([0 max(mean_cost/1e6) + 1.5]); % Dynamically scales X-axis to fit all data
 ylim([8000 28000]);
-legend('Concepts with ±2σ', 'Pareto Front', 'Location','northwest');
+legend('Concepts with ±2σ', 'Pareto Front', 'Historical Ref', 'Location','northwest');
 set(gca, 'FontSize',12);
+% Remove scientific notation on axes: use fixed-point format for tick labels
+ax = gca;
+ax.XAxis.Exponent = 0; % Forces X-axis to standard notation
+ax.YAxis.Exponent = 0; % Forces Y-axis to standard notation
+ytickformat('%,.0f');  % Adds commas to the Y-axis numbers (e.g., 20,000)
 
 % CLEANUP: Restore the original RNG state
 rng(original_rng_state);
