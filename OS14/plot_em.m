@@ -722,6 +722,24 @@ mean_contain(1) = mean(ca_samp); std_contain(1) = std(ca_samp);
 mean_cost(1) = mean(c_samp); std_cost(1) = std(c_samp);
 fprintf('Concept 1 (Max Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(1), std_contain(1), mean_cost(1), std_cost(1));
 
+% CONCEPT 1: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(31);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(1), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(1)));
+xline(mean_contain(1) - 2*std_contain(1), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(1) + 2*std_contain(1), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 1 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(1)-4*std_contain(1) mean_contain(1)+4*std_contain(1)]);
+
 % ==================================================================
 % CONCEPT 2: High Precision, Low Autonomy, Low Performance
 % Matrix Mapping: D1o2, D2o2, D3o2, D4o3, D5o1, D6o1, D7o3, D8o1, D9o2, D10o3
@@ -749,6 +767,24 @@ end
 mean_contain(2) = mean(ca_samp); std_contain(2) = std(ca_samp);
 mean_cost(2) = mean(c_samp); std_cost(2) = std(c_samp);
 fprintf('Concept 2 (Low Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(2), std_contain(2), mean_cost(2), std_cost(2));
+
+% CONCEPT 2: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(32);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(2), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(2)));
+xline(mean_contain(2) - 2*std_contain(2), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(2) + 2*std_contain(2), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 2 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(2)-4*std_contain(2) mean_contain(2)+4*std_contain(2)]);
 
 % ==================================================================
 % CONCEPT 3: High Precision, Medium Autonomy, Medium Performance
@@ -778,6 +814,24 @@ mean_contain(3) = mean(ca_samp); std_contain(3) = std(ca_samp);
 mean_cost(3) = mean(c_samp); std_cost(3) = std(c_samp);
 fprintf('Concept 3 (Med Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(3), std_contain(3), mean_cost(3), std_cost(3));
 
+% CONCEPT 3: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(33);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(3), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(3)));
+xline(mean_contain(3) - 2*std_contain(3), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(3) + 2*std_contain(3), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 3 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(3)-4*std_contain(3) mean_contain(3)+4*std_contain(3)]);
+
 % ==================================================================
 % CONCEPT 4: Minimal Cost
 % Matrix Mapping: D1o1, D2o3, D3o2, D4o3, D5o1, D6o1, D7o2, D8o1, D9o1, D10o1
@@ -805,6 +859,24 @@ end
 mean_contain(4) = mean(ca_samp); std_contain(4) = std(ca_samp);
 mean_cost(4) = mean(c_samp); std_cost(4) = std(c_samp);
 fprintf('Concept 4 (Min Cost): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(4), std_contain(4), mean_cost(4), std_cost(4));
+
+% CONCEPT 4: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(34);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(4), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(4)));
+xline(mean_contain(4) - 2*std_contain(4), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(4) + 2*std_contain(4), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 4 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(4)-4*std_contain(4) mean_contain(4)+4*std_contain(4)]);
 
 % ==================================================================
 % CONCEPT 5: Strategic Lift Optimized
@@ -834,6 +906,24 @@ mean_contain(5) = mean(ca_samp); std_contain(5) = std(ca_samp);
 mean_cost(5) = mean(c_samp); std_cost(5) = std(c_samp);
 fprintf('Concept 5 (Strat Lift): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(5), std_contain(5), mean_cost(5), std_cost(5));
 
+% CONCEPT 5: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(35);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(5), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(5)));
+xline(mean_contain(5) - 2*std_contain(5), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(5) + 2*std_contain(5), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 5 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(5)-4*std_contain(5) mean_contain(5)+4*std_contain(5)]);
+
 % ==================================================================
 % CONCEPT 10: Smallest Containment Area
 % Matrix Mapping: D1o3, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
@@ -861,6 +951,24 @@ end
 mean_contain(6) = mean(ca_samp); std_contain(6) = std(ca_samp);
 mean_cost(6) = mean(c_samp); std_cost(6) = std(c_samp);
 fprintf('Concept 10 (Min Area): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(6), std_contain(6), mean_cost(6), std_cost(6));
+
+% CONCEPT 10: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(36);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(6), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(6)));
+xline(mean_contain(6) - 2*std_contain(6), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(6) + 2*std_contain(6), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 10 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(6)-4*std_contain(6) mean_contain(6)+4*std_contain(6)]);
 
 % ==================================================================
 % CONCEPT 11: Largest Containment Area
@@ -890,6 +998,24 @@ mean_contain(7) = mean(ca_samp); std_contain(7) = std(ca_samp);
 mean_cost(7) = mean(c_samp); std_cost(7) = std(c_samp);
 fprintf('Concept 11 (Max Area): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(7), std_contain(7), mean_cost(7), std_cost(7));
 
+% CONCEPT 11: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+
+figure(37);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+
+% Vertical lines for mean and ±2σ
+xline(mean_contain(7), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(7)));
+xline(mean_contain(7) - 2*std_contain(7), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(7) + 2*std_contain(7), 'k--', 'LineWidth', 1.2);
+
+title('Monte Carlo Distribution - Concept 11 Containment Area');
+xlabel('Containment Area (m²)');
+ylabel('Probability Density');
+grid on;
+xlim([mean_contain(7)-4*std_contain(7) mean_contain(7)+4*std_contain(7)]);
+
 % % ==================================================================
 % % CONCEPT 12: Max Area Uncertainty
 % % Matrix Mapping: D1o3, D2o3, D3o3, D4o31 D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
@@ -917,6 +1043,24 @@ fprintf('Concept 11 (Max Area): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f 
 % mean_contain(8) = mean(ca_samp); std_contain(8) = std(ca_samp);
 % mean_cost(8) = mean(c_samp); std_cost(8) = std(c_samp);
 % fprintf('Concept 12 (Max Area +/-): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(8), std_contain(8), mean_cost(8), std_cost(8));
+% 
+% % CONCEPT 12: Monte Carlo Distribution Curve (PDF)
+% [pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+% 
+% figure(38);
+% plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+% hold on;
+% 
+% % Vertical lines for mean and ±2σ
+% xline(mean_contain(8), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(8)));
+% xline(mean_contain(8) - 2*std_contain(8), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+% xline(mean_contain(8) + 2*std_contain(8), 'k--', 'LineWidth', 1.2);
+% 
+% title('Monte Carlo Distribution - Concept 12 Containment Area');
+% xlabel('Containment Area (m²)');
+% ylabel('Probability Density');
+% grid on;
+% xlim([mean_contain(8)-4*std_contain(8) mean_contain(8)+4*std_contain(8)]);
 
 %% ==================================================================
 % Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
