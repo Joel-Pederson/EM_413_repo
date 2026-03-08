@@ -10,7 +10,7 @@ CAslope = 880;
 
 %% -- Question 1 Decision Aid -- %%
 
-%% %%%% -- CONTAINMENT -- %%%% %%
+%% %%%% -- CONTAINMENT AREA -- %%%% %%
 
 %% -- DECISION 1: LOADING METHOD CONTAINMENT -- %%
 % Modeled based on CAslope = 880 logic. 
