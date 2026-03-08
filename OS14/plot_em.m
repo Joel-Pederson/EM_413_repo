@@ -603,13 +603,13 @@ mu_d9_o3_cost = 35034; sigma_d9_o3_cost = 5225;
 y_d9_o3_cost = normpdf(x_cost9_flat, mu_d9_o3_cost, sigma_d9_o3_cost);
 
 figure(109);
-plot(x_cost9_flat, y_d9_o1_cost, 'r', 'LineWidth', 2, 'DisplayName', 'Ground Retrieval'); hold on;
+plot(x_cost9_flat, y_d9_o1_cost, 'b', 'LineWidth', 2, 'DisplayName', 'Ground Retrieval'); hold on;
 plot(x_cost9_flat, y_d9_o3_cost, 'g', 'LineWidth', 2, 'DisplayName', 'Air-based Recovery');
 title('Flat Cost PDFs (D9: Recovery Method)'); xlabel('Cost ($)'); ylabel('Density');
 legend('Location', 'NorthEast'); grid on; xlim([0 50000]);
 
 figure(110);
-plot(x_cost9_mult, y_d9_o2_mult, 'b', 'LineWidth', 2, 'DisplayName', 'Expendable');
+plot(x_cost9_mult, y_d9_o2_mult, 'r', 'LineWidth', 2, 'DisplayName', 'Expendable');
 title('Cost Multiplier PDF (D9: Recovery Method)'); xlabel('Hardware Multiplier'); ylabel('Density');
 legend('Location', 'NorthEast'); grid on; xlim([0.0 2.0]);
 
@@ -720,7 +720,7 @@ for i = 1:nTrials
 end
 mean_contain(1) = mean(ca_samp); std_contain(1) = std(ca_samp);
 mean_cost(1) = mean(c_samp); std_cost(1) = std(c_samp);
-fprintf('Concept 1 (Max Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(1), mean_cost(1));
+fprintf('Concept 1 (Max Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(1), std_contain(1), mean_cost(1), std_cost(1));
 
 % ==================================================================
 % CONCEPT 2: High Precision, Low Autonomy, Low Performance
@@ -748,7 +748,7 @@ for i = 1:nTrials
 end
 mean_contain(2) = mean(ca_samp); std_contain(2) = std(ca_samp);
 mean_cost(2) = mean(c_samp); std_cost(2) = std(c_samp);
-fprintf('Concept 2 (Low Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(2), mean_cost(2));
+fprintf('Concept 2 (Low Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(2), std_contain(2), mean_cost(2), std_cost(2));
 
 % ==================================================================
 % CONCEPT 3: High Precision, Medium Autonomy, Medium Performance
@@ -776,11 +776,11 @@ for i = 1:nTrials
 end
 mean_contain(3) = mean(ca_samp); std_contain(3) = std(ca_samp);
 mean_cost(3) = mean(c_samp); std_cost(3) = std(c_samp);
-fprintf('Concept 3 (Med Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(3), mean_cost(3));
+fprintf('Concept 3 (Med Auto): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(3), std_contain(3), mean_cost(3), std_cost(3));
 
 % ==================================================================
 % CONCEPT 4: Minimal Cost
-% Matrix Mapping: D1o2, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o2, D10o1
+% Matrix Mapping: D1o1, D2o3, D3o2, D4o3, D5o1, D6o1, D7o2, D8o1, D9o1, D10o1
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o1_area, sigma_d1_o1_area)*(fib_table.D1(1)/max_fib_sum) + ...
@@ -789,7 +789,7 @@ for i = 1:nTrials
                  normrnd(mu_d4_o3_area, sigma_d4_o3_area)*(fib_table.D4(3)/max_fib_sum) + ...
                  normrnd(mu_d5_o1_area, sigma_d5_o1_area)*(fib_table.D5(1)/max_fib_sum) + ...
                  normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
-                 (betarnd(alpha6,beta6)*(b6-a6)+a6)*(fib_table.D7(3)/max_fib_sum) + ...
+                 tri_rnd(a_tri, c_tri, b_tri)*(fib_table.D7(2)/max_fib_sum) + ...
                  normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
                  normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
                  (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
@@ -804,7 +804,7 @@ for i = 1:nTrials
 end
 mean_contain(4) = mean(ca_samp); std_contain(4) = std(ca_samp);
 mean_cost(4) = mean(c_samp); std_cost(4) = std(c_samp);
-fprintf('Concept 4 (Min Cost): Area = %.0f m² | Cost = $%.0f\n', mean_contain(4), mean_cost(4));
+fprintf('Concept 4 (Min Cost): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(4), std_contain(4), mean_cost(4), std_cost(4));
 
 % ==================================================================
 % CONCEPT 5: Strategic Lift Optimized
@@ -832,7 +832,7 @@ for i = 1:nTrials
 end
 mean_contain(5) = mean(ca_samp); std_contain(5) = std(ca_samp);
 mean_cost(5) = mean(c_samp); std_cost(5) = std(c_samp);
-fprintf('Concept 5 (Strat Lift): Area = %.0f m² | Cost = $%.0f\n', mean_contain(5), mean_cost(5));
+fprintf('Concept 5 (Strat Lift): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(5), std_contain(5), mean_cost(5), std_cost(5));
 
 % ==================================================================
 % CONCEPT 10: Smallest Containment Area
@@ -860,7 +860,7 @@ for i = 1:nTrials
 end
 mean_contain(6) = mean(ca_samp); std_contain(6) = std(ca_samp);
 mean_cost(6) = mean(c_samp); std_cost(6) = std(c_samp);
-fprintf('Concept 10 (Min Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(6), mean_cost(6));
+fprintf('Concept 10 (Min Area): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(6), std_contain(6), mean_cost(6), std_cost(6));
 
 % ==================================================================
 % CONCEPT 11: Largest Containment Area
@@ -888,7 +888,35 @@ for i = 1:nTrials
 end
 mean_contain(7) = mean(ca_samp); std_contain(7) = std(ca_samp);
 mean_cost(7) = mean(c_samp); std_cost(7) = std(c_samp);
-fprintf('Concept 11 (Max Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(7), mean_cost(7));
+fprintf('Concept 11 (Max Area): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(7), std_contain(7), mean_cost(7), std_cost(7));
+
+% % ==================================================================
+% % CONCEPT 12: Max Area Uncertainty
+% % Matrix Mapping: D1o3, D2o3, D3o3, D4o31 D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
+% ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
+% for i = 1:nTrials
+%     ca_samp(i) = normrnd(mu_d1_o3_area, sigma_d1_o3_area)*(fib_table.D1(3)/max_fib_sum) + ...
+%                  normrnd(mu3, sigma3)*(fib_table.D2(3)/max_fib_sum) + ...
+%                  normrnd(mu_d3_o3_area, sigma_d3_o3_area)*(fib_table.D3(3)/max_fib_sum) + ...
+%                  normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
+%                  normrnd(mu_d5_o3_area, sigma_d5_o3_area)*(fib_table.D5(3)/max_fib_sum) + ...
+%                  normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+%                  (betarnd(alpha6,beta6)*(b6-a6)+a6)*(fib_table.D7(3)/max_fib_sum) + ...
+%                  normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
+%                  normrnd(mu_d9_o3_area, sigma_d9_o3_area)*(fib_table.D9(3)/max_fib_sum) + ...
+%                  (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+% 
+%     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o3_cost, sigma_d5_o3_cost));
+%     attr = 0; % Air-based recovery (no hardware penalty)
+%     ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
+%           pos(normrnd(mu_d3_o3_cost, sigma_d3_o3_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+%           pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
+%           pos(normrnd(mu_d9_o3_cost, sigma_d9_o3_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
+%     c_samp(i) = hw + attr + ops;
+% end
+% mean_contain(8) = mean(ca_samp); std_contain(8) = std(ca_samp);
+% mean_cost(8) = mean(c_samp); std_cost(8) = std(c_samp);
+% fprintf('Concept 12 (Max Area +/-): Area = %.0f m² | Std = %.0f m² | Cost = $%.0f | Std = $%.0f\n', mean_contain(8), std_contain(8), mean_cost(8), std_cost(8));
 
 %% ==================================================================
 % Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
