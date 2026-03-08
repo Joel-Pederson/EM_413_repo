@@ -583,29 +583,36 @@ fprintf('Option 2 (Super):  Mu = $%.0f | Sigma = $%.0f\n', mu_d8_o2_cost, sigma_
 fprintf('Option 3 (Coord):  Mu = $%.0f | Sigma = $%.0f\n', mu_d8_o3_cost, sigma_d8_o3_cost);
 
 %% -- DECISION 9: RECOVERY METHOD COST -- %%
+% ALIGNED: O1=Expendable, O2=Ground, O3=Air-based
 x_cost9_flat = linspace(0, 50000, 1000); 
 x_cost9_mult = linspace(0, 2, 1000); 
-mu_d9_o1_cost = 1000; sigma_d9_o1_cost = 300;
-y_d9_o1_cost = normpdf(x_cost9_flat, mu_d9_o1_cost, sigma_d9_o1_cost);
-mu_d9_o2_cost = 1.0; sigma_d9_o2_cost = 0.05; 
-y_d9_o2_mult = normpdf(x_cost9_mult, mu_d9_o2_cost, sigma_d9_o2_cost);
+
+% -- Option 1: Expendable / Attritable (Multiplier) 
+mu_d9_o1_cost = 1.0; sigma_d9_o1_cost = 0.05; 
+y_d9_o1_mult = normpdf(x_cost9_mult, mu_d9_o1_cost, sigma_d9_o1_cost);
+
+% -- Option 2: Ground Crew Physical Recovery (Flat)
+mu_d9_o2_cost = 1000; sigma_d9_o2_cost = 300;
+y_d9_o2_cost = normpdf(x_cost9_flat, mu_d9_o2_cost, sigma_d9_o2_cost);
+
+% -- Option 3: Air-Based Recovery (Flat) 
 mu_d9_o3_cost = 35034; sigma_d9_o3_cost = 5225;
 y_d9_o3_cost = normpdf(x_cost9_flat, mu_d9_o3_cost, sigma_d9_o3_cost);
 
 figure(109);
-plot(x_cost9_flat, y_d9_o1_cost, 'b', 'LineWidth', 2, 'DisplayName', 'Ground Retrieval'); hold on;
+plot(x_cost9_flat, y_d9_o2_cost, 'r', 'LineWidth', 2, 'DisplayName', 'Ground Retrieval'); hold on;
 plot(x_cost9_flat, y_d9_o3_cost, 'g', 'LineWidth', 2, 'DisplayName', 'Air-based Recovery');
 title('Flat Cost PDFs (D9: Recovery Method)'); xlabel('Cost ($)'); ylabel('Density');
 legend('Location', 'NorthEast'); grid on; xlim([0 50000]);
 
 figure(110);
-plot(x_cost9_mult, y_d9_o2_mult, 'r', 'LineWidth', 2, 'DisplayName', 'Expendable');
+plot(x_cost9_mult, y_d9_o1_mult, 'b', 'LineWidth', 2, 'DisplayName', 'Expendable');
 title('Cost Multiplier PDF (D9: Recovery Method)'); xlabel('Hardware Multiplier'); ylabel('Density');
 legend('Location', 'NorthEast'); grid on; xlim([0 2]);
 
 fprintf('\n--- D9 Cost Statistics ---\n');
-fprintf('Option 1 (Ground):  Mu = $%.0f | Sigma = $%.0f\n', mu_d9_o1_cost, sigma_d9_o1_cost);
-fprintf('Option 2 (Expend):  Mu = %.1fx | Sigma = %.2fx (Mult)\n', mu_d9_o2_cost, sigma_d9_o2_cost);
+fprintf('Option 1 (Expend):  Mu = %.1fx | Sigma = %.2fx (Mult)\n', mu_d9_o1_cost, sigma_d9_o1_cost);
+fprintf('Option 2 (Ground):  Mu = $%.0f | Sigma = $%.0f\n', mu_d9_o2_cost, sigma_d9_o2_cost);
 fprintf('Option 3 (Air-Rec): Mu = $%.0f | Sigma = $%.0f\n', mu_d9_o3_cost, sigma_d9_o3_cost);
 
 %% -- DECISION 10: ENCAPSULATION METHOD COST -- %%
@@ -680,17 +687,15 @@ tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b
 % Helper function to prevent negative costs from high-variance options
 pos = @(x) max(0, x); 
 
-% Preallocate Data Arrays
+% Preallocate Data Arrays (Length 7 to match rubric requirements)
 mean_contain = zeros(1,7); std_contain = zeros(1,7);
 mean_cost = zeros(1,7); std_cost = zeros(1,7);
 
 % ==================================================================
 % CONCEPT 1: High Precision, High Performance, Max Autonomy
-% D1o1, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o3, D10o3
-% Preallocate samples for containment area and cost across trials
+% Matrix Mapping: D1o1, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o3, D10o3
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    % Containment Draw - weighted random contributions from fiber table components
     ca_samp(i) = normrnd(mu_d1_o1_area, sigma_d1_o1_area)*(fib_table.D1(1)/max_fib_sum) + ...
                  (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
                  normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
@@ -701,23 +706,22 @@ for i = 1:nTrials
                  (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
                  normrnd(mu_d9_o3_area, sigma_d9_o3_area)*(fib_table.D9(3)/max_fib_sum) + ...
                  (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
-    % Cost Draw - separate hardware and operations cost components
+                 
     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
-    % Sum operational costs from multiple stochastic sources (ensures nonnegative via pos)
+    attr = 0; % Air-based recovery (no hardware penalty)
     ops = pos(normrnd(mu_d1_o1_cost, sigma_d1_o1_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
           pos(normrnd(mu_d9_o3_cost, sigma_d9_o3_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
-    c_samp(i) = hw + ops;
+    c_samp(i) = hw + attr + ops;
 end
-% Aggregate statistics for concept 1
 mean_contain(1) = mean(ca_samp); std_contain(1) = std(ca_samp);
 mean_cost(1) = mean(c_samp); std_cost(1) = std(c_samp);
 fprintf('Concept 1 (Max Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(1), mean_cost(1));
 
 % ==================================================================
 % CONCEPT 2: High Precision, Low Autonomy, Low Performance
-% D1o2, D2o2, D3o2, D4o3, D5o1, D6o1, D7o3, D8o1, D9o2, D10o3
+% Matrix Mapping: D1o2, D2o2, D3o2, D4o3, D5o1, D6o1, D7o3, D8o1, D9o2, D10o3
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
@@ -730,12 +734,13 @@ for i = 1:nTrials
                  normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
                  normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
                  (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
-    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
+    attr = 0; % Ground Recovery (no hardware penalty)
     ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
-          pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+          pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
     c_samp(i) = hw + attr + ops;
 end
 mean_contain(2) = mean(ca_samp); std_contain(2) = std(ca_samp);
@@ -744,7 +749,7 @@ fprintf('Concept 2 (Low Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(2
 
 % ==================================================================
 % CONCEPT 3: High Precision, Medium Autonomy, Medium Performance
-% D1o2, D2o2, D3o3, D4o2, D5o2, D6o1, D7o2, D8o2, D9o2, D10o3
+% Matrix Mapping: D1o2, D2o2, D3o3, D4o2, D5o2, D6o1, D7o2, D8o2, D9o2, D10o3
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
@@ -757,12 +762,13 @@ for i = 1:nTrials
                  normrnd(mu_d8_o2_area, sigma_d8_o2_area)*(fib_table.D8(2)/max_fib_sum) + ...
                  normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
                  (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o2_cost, sigma_d4_o2_cost)) * pos(normrnd(mu_d5_o2_cost, sigma_d5_o2_cost));
-    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
+    attr = 0; % Ground Recovery (no hardware penalty)
     ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o3_cost, sigma_d3_o3_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_2, c_c7_2, b_c7_2)) + pos(normrnd(mu_d8_o2_cost, sigma_d8_o2_cost)) + ...
-          pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+          pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
     c_samp(i) = hw + attr + ops;
 end
 mean_contain(3) = mean(ca_samp); std_contain(3) = std(ca_samp);
@@ -770,61 +776,64 @@ mean_cost(3) = mean(c_samp); std_cost(3) = std(c_samp);
 fprintf('Concept 3 (Med Auto): Area = %.0f m² | Cost = $%.0f\n', mean_contain(3), mean_cost(3));
 
 % ==================================================================
-% CONCEPT 4: Balanced Attritable Swarm
-% D1o1, D2o3, D3o1, D4o3, D5o3, D6o1, D7o2, D8o3, D9o2, D10o2
+% CONCEPT 4: Minimal Cost
+% Matrix Mapping: D1o2, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o2, D10o1
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
-    ca_samp(i) = normrnd(mu_d1_o1_area, sigma_d1_o1_area)*(fib_table.D1(1)/max_fib_sum) + ...
+    ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
                  normrnd(mu3, sigma3)*(fib_table.D2(3)/max_fib_sum) + ...
-                 normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
+                 normrnd(mu_d3_o2_area, sigma_d3_o2_area)*(fib_table.D3(2)/max_fib_sum) + ...
                  normrnd(mu_d4_o3_area, sigma_d4_o3_area)*(fib_table.D4(3)/max_fib_sum) + ...
                  normrnd(mu_d5_o3_area, sigma_d5_o3_area)*(fib_table.D5(3)/max_fib_sum) + ...
                  normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
-                 tri_rnd(a_tri, c_tri, b_tri)*(fib_table.D7(2)/max_fib_sum) + ...
-                 (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
+                 (betarnd(alpha6,beta6)*(b6-a6)+a6)*(fib_table.D7(3)/max_fib_sum) + ...
+                 normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
                  normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
-                 (betarnd(alpha10_2,beta10_2)*(b10_2-a10_2)+a10_2)*(fib_table.D10(2)/max_fib_sum);
+                 (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o3_cost, sigma_d5_o3_cost));
-    attr = hw * pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)); 
-    ops = pos(normrnd(mu_d1_o1_cost, sigma_d1_o1_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
-          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
-          pos(tri_rnd(a_c7_2, c_c7_2, b_c7_2)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
-          pos(normrnd(mu_d10_o2_cost, sigma_d10_o2_cost));
+    attr = 0; % Ground Recovery (no hardware penalty)
+    ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
+          pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
+          pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
     c_samp(i) = hw + attr + ops;
 end
 mean_contain(4) = mean(ca_samp); std_contain(4) = std(ca_samp);
 mean_cost(4) = mean(c_samp); std_cost(4) = std(c_samp);
-fprintf('Concept 4 (Bal Swarm): Area = %.0f m² | Cost = $%.0f\n', mean_contain(4), mean_cost(4));
+fprintf('Concept 4 (Min Cost): Area = %.0f m² | Cost = $%.0f\n', mean_contain(4), mean_cost(4));
 
 % ==================================================================
-% CONCEPT 5: Heavy Ground Ops
-% D1o3, D2o1, D3o2, D4o1, D5o2, D6o1, D7o1, D8o2, D9o1, D10o1
+% CONCEPT 5: Strategic Lift Optimized
+% Matrix Mapping: D1o3, D2o2, D3o1, D4o1, D5o2, D6o1, D7o2, D8o2, D9o2, D10o3
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o3_area, sigma_d1_o3_area)*(fib_table.D1(3)/max_fib_sum) + ...
-                 (betarnd(alpha1,beta1)*(b1-a1)+a1)*(fib_table.D2(1)/max_fib_sum) + ...
-                 normrnd(mu_d3_o2_area, sigma_d3_o2_area)*(fib_table.D3(2)/max_fib_sum) + ...
+                 (betarnd(alpha2,beta2)*(b2-a2)+a2)*(fib_table.D2(2)/max_fib_sum) + ...
+                 normrnd(mu_d3_o1_area, sigma_d3_o1_area)*(fib_table.D3(1)/max_fib_sum) + ...
                  normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
                  normrnd(mu_d5_o2_area, sigma_d5_o2_area)*(fib_table.D5(2)/max_fib_sum) + ...
                  normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
-                 (betarnd(alpha4,beta4)*(b4-a4)+a4)*(fib_table.D7(1)/max_fib_sum) + ...
+                 tri_rnd(a_tri, c_tri, b_tri)*(fib_table.D7(2)/max_fib_sum) + ...
                  normrnd(mu_d8_o2_area, sigma_d8_o2_area)*(fib_table.D8(2)/max_fib_sum) + ...
-                 normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
-                 (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+                 normrnd(mu_d9_o2_area, sigma_d9_o2_area)*(fib_table.D9(2)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o2_cost, sigma_d5_o2_cost));
-    ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(tri_rnd(a_c2_1, c_c2_1, b_c2_1)) + ...
-          pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
-          pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o2_cost, sigma_d8_o2_cost)) + ...
-          pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
-    c_samp(i) = hw + ops; % No attritable penalty for ground recovery
+    attr = 0; % Ground Recovery (no hardware penalty)
+    ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
+          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_2, c_c7_2, b_c7_2)) + pos(normrnd(mu_d8_o2_cost, sigma_d8_o2_cost)) + ...
+          pos(normrnd(mu_d9_o2_cost, sigma_d9_o2_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost)); 
+    c_samp(i) = hw + attr + ops;
 end
 mean_contain(5) = mean(ca_samp); std_contain(5) = std(ca_samp);
 mean_cost(5) = mean(c_samp); std_cost(5) = std(c_samp);
-fprintf('Concept 5 (Heavy Ops): Area = %.0f m² | Cost = $%.0f\n', mean_contain(5), mean_cost(5));
+fprintf('Concept 5 (Strat Lift): Area = %.0f m² | Cost = $%.0f\n', mean_contain(5), mean_cost(5));
 
 % ==================================================================
-% CONCEPT 6 (Formerly 10): Smallest Containment Area
-% D1o3, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
+% CONCEPT 10: Smallest Containment Area
+% Matrix Mapping: D1o3, D2o3, D3o2, D4o3, D5o3, D6o1, D7o3, D8o1, D9o3, D10o1
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o3_area, sigma_d1_o3_area)*(fib_table.D1(3)/max_fib_sum) + ...
@@ -837,20 +846,22 @@ for i = 1:nTrials
                  normrnd(mu_d8_o1_area, sigma_d8_o1_area)*(fib_table.D8(1)/max_fib_sum) + ...
                  normrnd(mu_d9_o3_area, sigma_d9_o3_area)*(fib_table.D9(3)/max_fib_sum) + ...
                  (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1)*(fib_table.D10(1)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o3_cost, sigma_d4_o3_cost)) * pos(normrnd(mu_d5_o3_cost, sigma_d5_o3_cost));
+    attr = 0; % Air-based recovery (no hardware penalty)
     ops = pos(normrnd(mu_d1_o3_cost, sigma_d1_o3_cost)) + pos(normrnd(mu_d2_o3_cost, sigma_d2_o3_cost)) + ...
           pos(normrnd(mu_d3_o2_cost, sigma_d3_o2_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_3, c_c7_3, b_c7_3)) + pos(normrnd(mu_d8_o1_cost, sigma_d8_o1_cost)) + ...
           pos(normrnd(mu_d9_o3_cost, sigma_d9_o3_cost)) + pos(normrnd(mu_d10_o1_cost, sigma_d10_o1_cost));
-    c_samp(i) = hw + ops;
+    c_samp(i) = hw + attr + ops;
 end
 mean_contain(6) = mean(ca_samp); std_contain(6) = std(ca_samp);
 mean_cost(6) = mean(c_samp); std_cost(6) = std(c_samp);
-fprintf('Concept 6 (Min Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(6), mean_cost(6));
+fprintf('Concept 10 (Min Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(6), mean_cost(6));
 
 % ==================================================================
-% CONCEPT 7 (Formerly 11): Largest Containment Area
-% D1o2, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o1, D10o3
+% CONCEPT 11: Largest Containment Area
+% Matrix Mapping: D1o2, D2o2, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o1, D10o3
 ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
 for i = 1:nTrials
     ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
@@ -863,16 +874,18 @@ for i = 1:nTrials
                  (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
                  normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
                  (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+                 
     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    attr = hw * pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)); % EXPENDABLE/NO-RECOVERY (Multiplier applied)
     ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
           pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
-          pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
-    c_samp(i) = hw + ops;
+          pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost)); % No flat D9 ops cost
+    c_samp(i) = hw + attr + ops;
 end
 mean_contain(7) = mean(ca_samp); std_contain(7) = std(ca_samp);
 mean_cost(7) = mean(c_samp); std_cost(7) = std(c_samp);
-fprintf('Concept 7 (Max Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(7), mean_cost(7));
+fprintf('Concept 11 (Max Area): Area = %.0f m² | Cost = $%.0f\n', mean_contain(7), mean_cost(7));
 
 %% ==================================================================
 % Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
@@ -883,49 +896,67 @@ errorbar(mean_cost/1e6, mean_contain, ...
          2*std_contain, 2*std_contain, ...   % vertical uncertainty
          2*std_cost/1e6, 2*std_cost/1e6, ... % horizontal uncertainty
          'o', 'LineStyle','none', 'Color','k', 'LineWidth',2.5, ...
-         'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74]);
+         'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74], 'DisplayName', 'Concepts with \pm2\sigma');
 hold on;
-% Scatter the exact means over the error bars for emphasis
-scatter(mean_cost/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
-
-% Dynamic Pareto Front curve (Anchored to your non-dominated simulated concepts)
-x_curve = linspace(0, max(mean_cost/1e6) + 2, 200);
-
-% Define anchor points: [Origin, Historical Baseline, Concept 2, Concept 11, Utopia Asymptote]
-pareto_x = [0, 1.5, mean_cost(2)/1e6, mean_cost(7)/1e6, max(mean_cost/1e6) + 2];
-pareto_y = [0, 12000, mean_contain(2), mean_contain(7), 26000];
-
-y_curve = interp1(pareto_x, pareto_y, x_curve, 'pchip');
-plot(x_curve, y_curve, 'Color',[1 0.65 0], 'LineWidth',3.5);
 
 % Historical Design of Reference (Smokejumpers)
-plot(1.5, 12000, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k');
-text(1.6, 12000, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
+hist_cost = 1.5;
+hist_contain = 12000;
+plot(hist_cost, hist_contain, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k', 'DisplayName', 'Historical Ref');
+text(hist_cost + 0.1, hist_contain, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 
-% Concept Labels
-labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Bal Swarm', 'C5 Heavy Ops', 'C10 Min Area', 'C11 Max Area'};
+% --- DYNAMIC PARETO FRONT ALGORITHM ---
+% Pool all data points including the historical baseline
+all_costs = [hist_cost, mean_cost/1e6];
+all_areas = [hist_contain, mean_contain];
+
+% Sort by cost (minimize x)
+[sorted_costs, sort_idx] = sort(all_costs);
+sorted_areas = all_areas(sort_idx);
+
+% Extract non-dominated points (maximize y)
+pareto_x = [];
+pareto_y = [];
+max_area_so_far = -Inf;
+
+for i = 1:length(sorted_costs)
+    if sorted_areas(i) > max_area_so_far
+        pareto_x(end+1) = sorted_costs(i);
+        pareto_y(end+1) = sorted_areas(i);
+        max_area_so_far = sorted_areas(i);
+    end
+end
+
+% Connect the dominant designs with straight lines
+plot(pareto_x, pareto_y, '-o', 'Color', [1 0.65 0], 'LineWidth', 3.5, 'MarkerSize', 8, 'MarkerFaceColor', [1 0.65 0], 'DisplayName', 'Pareto Front');
+% ----------------------------------------
+
+% Concept Labels (Updated to match OS13 Matrix)
+labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', 'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area'};
 for i = 1:7
-    text(mean_cost(i)/1e6 + 0.15, mean_contain(i) + 350, labels{i}, 'FontSize',11, 'FontWeight','bold');
+    text(mean_cost(i)/1e6 + 0.2, mean_contain(i) + 350, labels{i}, 'FontSize',11, 'FontWeight','bold');
 end
 
 % Utopia Point
-plot(0, 26000, 'p', 'MarkerSize',18, 'MarkerFaceColor',[1 0.84 0]);
-text(0.2, 26500, 'Utopia', 'FontWeight','bold');
+plot(0, 26000, 'p', 'MarkerSize', 18, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', [1 0.84 0], 'DisplayName', 'Utopia Point');
+text(0.3, 26000, 'Utopia', 'FontWeight', 'bold', 'VerticalAlignment', 'middle');
 
 % Plot Formatting
 title('Tradespace: Wildfire Containment Area vs. System Cost (Monte Carlo Uncertainty)');
 xlabel('System Cost [Purchase + Cost of Operation] ($ millions)');
 ylabel('Wildfire Containment Area (m²)');
 grid on;
-xlim([0 max(mean_cost/1e6) + 1.5]); % Dynamically scales X-axis to fit all data
+xlim([-0.5 max(mean_cost/1e6) + 1.5]); 
 ylim([8000 28000]);
-legend('Concepts with ±2σ', 'Pareto Front', 'Historical Ref', 'Location','northwest');
+
+% Call the legend (it will automatically grab all 'DisplayName' tags)
+legend('Location','northwest');
 set(gca, 'FontSize',12);
-% Remove scientific notation on axes: use fixed-point format for tick labels
+
 ax = gca;
 ax.XAxis.Exponent = 0; % Forces X-axis to standard notation
 ax.YAxis.Exponent = 0; % Forces Y-axis to standard notation
-ytickformat('%,.0f');  % Adds commas to the Y-axis numbers (e.g., 20,000)
+ytickformat('%,.0f');  % Adds commas to the Y-axis numbers
 
 % CLEANUP: Restore the original RNG state
 rng(original_rng_state);
