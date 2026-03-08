@@ -637,7 +637,7 @@ for i = 1:length(figHandles)
     end
 end
 
-%% Q2 FIBONACCI LOOKUP TABLE (from OS13 matrix)
+%% --  Q2 FIBONACCI LOOKUP TABLE (from OS13 matrix) -- %%
 % Decision | Option1 score | Option2 score | Option3 score
 fib_table.D1 = [2, 3, 1];   % Self-Propelled, Containerized, Ground Loader
 fib_table.D2 = [5, 5, 1];   % Containerized Drone, Parafoil, Airbag
@@ -664,9 +664,19 @@ for k = 1:numel(fields)
 end
 
 %% Q2 MONTE CARLO - Containment Area Only (Weighted by Fibonacci)
-nTrials = 10000;
 
+% Save the user's current RNG state so we don't mess up their future work
+original_rng_state = rng; 
+% Lock the seed to 1 for perfectly repeatable Monte Carlo draws
+rng(1); 
+
+nTrials = 10000;
 fprintf('\n=== Q2 Monte Carlo Results (Weighted Containment Area) ===\n');
+
+% Helper anonymous function to draw a random number from a Triangular Distribution
+% U is a random number between 0 and 1. It uses inverse transform sampling.
+tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b - a)) + ...
+                     (b - sqrt((1 - rand()) * (b - a) * (b - c)) - a) * (rand() >= (c - a)/(b - a));
 
 % ==================================================================
 % Concept 1 (High Precision, High Performance, Max Autonomy)
@@ -678,7 +688,7 @@ for i = 1:nTrials
     contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o1_area, sigma_d4_o1_area) * (fib_table.D4(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + ((a_tri+b_tri+c_tri)/3) * (fib_table.D7(1) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + (betarnd(alpha4,beta4)*(b4-a4)+a4) * (fib_table.D7(1) / max_fib_sum); % D7 Opt 1 is Beta
     contain_samples(i) = contain_samples(i) + (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3) * (fib_table.D8(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o3_area, sigma_d9_o3_area) * (fib_table.D9(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
@@ -697,7 +707,7 @@ for i = 1:nTrials
     contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o3_area, sigma_d4_o3_area) * (fib_table.D4(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + ((a_tri+b_tri+c_tri)/3) * (fib_table.D7(3) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + (betarnd(alpha6,beta6)*(b6-a6)+a6) * (fib_table.D7(3) / max_fib_sum); % D7 Opt 3 is Beta
     contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o1_area, sigma_d8_o1_area) * (fib_table.D8(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o2_area, sigma_d9_o2_area) * (fib_table.D9(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
@@ -716,7 +726,7 @@ for i = 1:nTrials
     contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o2_area, sigma_d4_o2_area) * (fib_table.D4(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o2_area, sigma_d5_o2_area) * (fib_table.D5(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + ((a_tri+b_tri+c_tri)/3) * (fib_table.D7(2) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + tri_rnd(a_tri, c_tri, b_tri) * (fib_table.D7(2) / max_fib_sum); % D7 Opt 2 is Triangular
     contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o2_area, sigma_d8_o2_area) * (fib_table.D8(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o2_area, sigma_d9_o2_area) * (fib_table.D9(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
@@ -730,12 +740,12 @@ fprintf('Concept 3: Mean = %.0f m² | Std = %.0f m²\n', mean_C3, std_C3);
 contain_samples = zeros(nTrials,1);
 for i = 1:nTrials
     contain_samples(i) = contain_samples(i) + normrnd(mu_d1_o3_area, sigma_d1_o3_area) * (fib_table.D1(3) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + (betarnd(alpha1,beta1)*(b1-a1)+a1) * (fib_table.D2(3) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + normrnd(mu3, sigma3) * (fib_table.D2(3) / max_fib_sum); % D2 Opt 3 is Normal
     contain_samples(i) = contain_samples(i) + normrnd(mu_d3_o2_area, sigma_d3_o2_area) * (fib_table.D3(2) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o3_area, sigma_d4_o3_area) * (fib_table.D4(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o3_area, sigma_d5_o3_area) * (fib_table.D5(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + ((a_tri+b_tri+c_tri)/3) * (fib_table.D7(3) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + (betarnd(alpha6,beta6)*(b6-a6)+a6) * (fib_table.D7(3) / max_fib_sum); % D7 Opt 3 is Beta
     contain_samples(i) = contain_samples(i) + normrnd(mu_d8_o1_area, sigma_d8_o1_area) * (fib_table.D8(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o3_area, sigma_d9_o3_area) * (fib_table.D9(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + (betarnd(alpha10_1,beta10_1)*(b10_1-a10_1)+a10_1) * (fib_table.D10(1) / max_fib_sum);
@@ -754,7 +764,7 @@ for i = 1:nTrials
     contain_samples(i) = contain_samples(i) + normrnd(mu_d4_o1_area, sigma_d4_o1_area) * (fib_table.D4(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d5_o1_area, sigma_d5_o1_area) * (fib_table.D5(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d6_o1_area, sigma_d6_o1_area) * (fib_table.D6(1) / max_fib_sum);
-    contain_samples(i) = contain_samples(i) + ((a_tri+b_tri+c_tri)/3) * (fib_table.D7(1) / max_fib_sum);
+    contain_samples(i) = contain_samples(i) + (betarnd(alpha4,beta4)*(b4-a4)+a4) * (fib_table.D7(1) / max_fib_sum); % D7 Opt 1 is Beta
     contain_samples(i) = contain_samples(i) + (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3) * (fib_table.D8(3) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + normrnd(mu_d9_o1_area, sigma_d9_o1_area) * (fib_table.D9(1) / max_fib_sum);
     contain_samples(i) = contain_samples(i) + (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3) * (fib_table.D10(3) / max_fib_sum);
@@ -763,12 +773,9 @@ mean_C11 = mean(contain_samples);
 std_C11  = std(contain_samples);
 fprintf('Concept 11: Mean = %.0f m² | Std = %.0f m²\n', mean_C11, std_C11);
 
-
-
 %% Q2 Tradespace Plot - Smooth Pareto Front + Better Error-Bar Visibility
 % Your OS13 system costs ($ millions) — update with your exact values
 cost_os13 = [8.5e6, 5.0e6, 12.0e6, 10.5e6, 9.0e6];   % C1, C2, C3, C10, C11
-
 mean_contain = [mean_C1, mean_C2, mean_C3, mean_C10, mean_C11];
 std_contain  = [std_C1,  std_C2,  std_C3,  std_C10,  std_C11];
 
@@ -776,7 +783,6 @@ figure(25); clf;
 errorbar(cost_os13/1e6, mean_contain, 2*std_contain, 'vertical', ...
     'LineStyle','none', 'Color','k', 'LineWidth',2.8, ...
     'Marker','o', 'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74]);
-
 hold on;
 scatter(cost_os13/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
 
@@ -802,3 +808,6 @@ xlim([0 32]);
 ylim([8000 28000]);           % Zoomed so error bars are clearly visible
 legend('Concepts with ±2σ', 'Pareto Front', 'Location','northwest');
 set(gca, 'FontSize',12);
+
+% CLEANUP: Restore the original RNG state
+rng(original_rng_state);
