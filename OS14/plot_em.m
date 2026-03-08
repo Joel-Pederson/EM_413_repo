@@ -888,9 +888,14 @@ hold on;
 % Scatter the exact means over the error bars for emphasis
 scatter(mean_cost/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
 
-% Smooth Pareto Front curve (adjust anchors based on your data if necessary)
+% Dynamic Pareto Front curve (Anchored to your non-dominated simulated concepts)
 x_curve = linspace(0, max(mean_cost/1e6) + 2, 200);
-y_curve = interp1([0, 2.0, 2.38, 4.05, 4.46, max(mean_cost/1e6)+2], [0, 9000, 18000, 23500, 24500, 26000], x_curve, 'pchip');
+
+% Define anchor points: [Origin, Historical Baseline, Concept 2, Concept 11, Utopia Asymptote]
+pareto_x = [0, 1.5, mean_cost(2)/1e6, mean_cost(7)/1e6, max(mean_cost/1e6) + 2];
+pareto_y = [0, 12000, mean_contain(2), mean_contain(7), 26000];
+
+y_curve = interp1(pareto_x, pareto_y, x_curve, 'pchip');
 plot(x_curve, y_curve, 'Color',[1 0.65 0], 'LineWidth',3.5);
 
 % Historical Design of Reference (Smokejumpers)
