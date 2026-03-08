@@ -104,17 +104,20 @@ fprintf('Option 3 (Airbag):   Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu3, sigma3
 
 % -- Option 1: Impact-Triggered Auto Activation
 % Normal Dist: Lowest impact on max potential containment area; mid variability
-mu_d3_o1_area = 26000 - CAslope * 0; sigma_d3_o1_area = CAslope * 2;
+sigma_d3_o1_area = CAslope * 2; % 1760
+mu_d3_o1_area = 26000 - (3 * sigma_d3_o1_area); % 20720
 y_d3_o1_area = normpdf(x, mu_d3_o1_area, sigma_d3_o1_area);
 
 % -- Option 2: Remote Commanded Activation
 % Normal Dist: Most impact on max potential containment area; low variability
-mu_d3_o2_area = 26000 - CAslope * 2; sigma_d3_o2_area = CAslope * 1;
+sigma_d3_o2_area = CAslope * 1; % 880
+mu_d3_o2_area = 26000 - (3 * sigma_d3_o2_area) - (CAslope * 2); % 21600
 y_d3_o2_area = normpdf(x, mu_d3_o2_area, sigma_d3_o2_area);
 
 % -- Option 3: Dual Key Auto & Remote Activation
 % Normal Dist: Low impact on max potential containment area; most variability
-mu_d3_o3_area = 26000 - CAslope * 1; sigma_d3_o3_area = CAslope * 3;
+sigma_d3_o3_area = CAslope * 3; % 2640
+mu_d3_o3_area = 26000 - (3 * sigma_d3_o3_area); % 18080
 y_d3_o3_area = normpdf(x, mu_d3_o3_area, sigma_d3_o3_area);
 
 % -- Plotting D3 
@@ -130,9 +133,9 @@ xtickformat('%,.0f'); ytickformat('%.5f');
 
 % -- D3 Math Printout for Table (Normal distributions)
 fprintf('\n--- D3 Containment Statistics (For Table) ---\n');
-fprintf('Option 1 (Auto Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o1_area, sigma_d3_o1_area);
+fprintf('Option 1 (Auto Activate):   Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o1_area, sigma_d3_o1_area);
 fprintf('Option 2 (Remote Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n', mu_d3_o2_area, sigma_d3_o2_area);
-fprintf('Option 3 (Dual Key Activate): Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d3_o3_area, sigma_d3_o3_area);
+fprintf('Option 3 (Dual Key):        Mu = %.0f m^2 | Sigma = %.0f m^2\n\n', mu_d3_o3_area, sigma_d3_o3_area);
 
 %% -- DECISION 4: FLEET COMPOSITION CONTAINMENT -- %%
 % -- Option 1: Homogeneous (Reliable but slower)
