@@ -666,7 +666,7 @@ end
 %% Q2 MONTE CARLO - Containment Area Only (Weighted by Fibonacci)
 
 % Save the user's current RNG state so we don't mess up their future work
-original_rng_state = rng; 
+original_rng_state = rng;
 % Lock the seed to 1 for perfectly repeatable Monte Carlo draws
 rng(1); 
 
@@ -773,39 +773,152 @@ mean_C11 = mean(contain_samples);
 std_C11  = std(contain_samples);
 fprintf('Concept 11: Mean = %.0f m² | Std = %.0f m²\n', mean_C11, std_C11);
 
-%% Q2 Tradespace Plot - Smooth Pareto Front + Better Error-Bar Visibility
-% Your OS13 system costs ($ millions) — update with your exact values
-cost_os13 = [8.5e6, 5.0e6, 12.0e6, 10.5e6, 9.0e6];   % C1, C2, C3, C10, C11
+%% Q2 COST MONTE CARLO - Full 5 Concepts (RAW SUM - no Fibonacci weighting)
+% Save the user's current RNG state so we don't mess up their future work
+original_rng_state = rng;
+% Lock the seed to 1 for perfectly repeatable Monte Carlo draws
+rng(1); 
+
+nTrials = 10000;
+fprintf('\n=== Q2 Monte Carlo Results (Weighted Containment Area) ===\n');
+
+% Helper anonymous function to draw a random number from a Triangular Distribution
+% U is a random number between 0 and 1. It uses inverse transform sampling.
+tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b - a)) + ...
+                     (b - sqrt((1 - rand()) * (b - a) * (b - c)) - a) * (rand() >= (c - a)/(b - a));
+
+
+% ==================================================================
+% Concept 1
+cost_samples = zeros(nTrials,1);
+for i = 1:nTrials
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o1_cost, sigma_d1_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_1, c_c2_1, b_c2_1);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o1_cost, sigma_d3_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o1_cost, sigma_d4_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_1, c_c7_1, b_c7_1);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o3_cost, sigma_d8_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o3_cost, sigma_d9_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+end
+mean_cost_C1 = mean(cost_samples);
+std_cost_C1  = std(cost_samples);
+fprintf('Concept 1 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C1, std_cost_C1);
+
+% ==================================================================
+% Concept 2
+cost_samples = zeros(nTrials,1);
+for i = 1:nTrials
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o2_cost, sigma_d3_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o3_cost, sigma_d4_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_3, c_c7_3, b_c7_3);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o1_cost, sigma_d8_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o2_cost, sigma_d9_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+end
+mean_cost_C2 = mean(cost_samples);
+std_cost_C2  = std(cost_samples);
+fprintf('Concept 2 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C2, std_cost_C2);
+
+% ==================================================================
+% Concept 3
+cost_samples = zeros(nTrials,1);
+for i = 1:nTrials
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o3_cost, sigma_d3_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o2_cost, sigma_d4_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o2_cost, sigma_d5_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_2, c_c7_2, b_c7_2);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o2_cost, sigma_d8_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o2_cost, sigma_d9_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+end
+mean_cost_C3 = mean(cost_samples);
+std_cost_C3  = std(cost_samples);
+fprintf('Concept 3 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C3, std_cost_C3);
+
+% ==================================================================
+% Concept 10
+cost_samples = zeros(nTrials,1);
+for i = 1:nTrials
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o3_cost, sigma_d1_o3_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_1, c_c2_1, b_c2_1);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o2_cost, sigma_d3_o2_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o3_cost, sigma_d4_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o3_cost, sigma_d5_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_3, c_c7_3, b_c7_3);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o1_cost, sigma_d8_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o3_cost, sigma_d9_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o1_cost, sigma_d10_o1_cost);
+end
+mean_cost_C10 = mean(cost_samples);
+std_cost_C10  = std(cost_samples);
+fprintf('Concept 10 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C10, std_cost_C10);
+
+% ==================================================================
+% Concept 11
+cost_samples = zeros(nTrials,1);
+for i = 1:nTrials
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d1_o2_cost, sigma_d1_o2_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c2_2, c_c2_2, b_c2_2);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d3_o1_cost, sigma_d3_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d4_o1_cost, sigma_d4_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d5_o1_cost, sigma_d5_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d6_o1_cost, sigma_d6_o1_cost);
+    cost_samples(i) = cost_samples(i) + tri_rnd(a_c7_1, c_c7_1, b_c7_1);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d8_o3_cost, sigma_d8_o3_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d9_o1_cost, sigma_d9_o1_cost);
+    cost_samples(i) = cost_samples(i) + normrnd(mu_d10_o3_cost, sigma_d10_o3_cost);
+end
+mean_cost_C11 = mean(cost_samples);
+std_cost_C11  = std(cost_samples);
+fprintf('Concept 11 Cost: Mean = $%.0f | Std = $%.0f\n', mean_cost_C11, std_cost_C11);
+
+%% Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
+mean_cost   = [mean_cost_C1, mean_cost_C2, mean_cost_C3, mean_cost_C10, mean_cost_C11];
+std_cost    = [std_cost_C1,  std_cost_C2,  std_cost_C3,  std_cost_C10,  std_cost_C11];
 mean_contain = [mean_C1, mean_C2, mean_C3, mean_C10, mean_C11];
 std_contain  = [std_C1,  std_C2,  std_C3,  std_C10,  std_C11];
 
 figure(25); clf;
-errorbar(cost_os13/1e6, mean_contain, 2*std_contain, 'vertical', ...
-    'LineStyle','none', 'Color','k', 'LineWidth',2.8, ...
-    'Marker','o', 'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74]);
+errorbar(mean_cost/1e6, mean_contain, ...
+         2*std_contain, 2*std_contain, ...   % vertical
+         2*std_cost/1e6, 2*std_cost/1e6, ... % horizontal
+         'o', 'LineStyle','none', 'Color','k', 'LineWidth',2.5, ...
+         'MarkerSize',11, 'MarkerFaceColor',[0 0.45 0.74]);
+
 hold on;
-scatter(cost_os13/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
+scatter(mean_cost/1e6, mean_contain, 140, 'MarkerFaceColor',[0 0.45 0.74], 'MarkerEdgeColor','k');
 
-% Smooth Pareto Front curve (no straight segments)
-x_curve = linspace(0, 30, 200);
-y_curve = interp1([0, 5, 8.5, 10, 28], [8094, 18000, 23500, 26000, 26000], x_curve, 'pchip');
-plot(x_curve, y_curve, 'Color',[1 0.65 0], 'LineWidth',3.5, 'DisplayName','Pareto Front');
+% Your exact favorite Pareto front (0-6M x-axis, 24,500 at $4.46M)
+x_curve = linspace(0, 6, 200);
+y_curve = interp1([0, 2.0, 2.38, 4.05, 4.46, 6], [0, 9000, 18000, 23500, 24500, 26000], x_curve, 'pchip');
+plot(x_curve, y_curve, 'Color',[1 0.65 0], 'LineWidth',3.5);
 
-% Labels and Utopia point
+% Labels + Utopia
 labels = {'C1 High-Prec Max Auto', 'C2 High-Prec Low Auto', 'C3 High-Prec Med Auto', ...
           'C10 Smallest Containment', 'C11 Largest Containment'};
 for i = 1:5
-    text(cost_os13(i)/1e6 + 0.4, mean_contain(i) + 350, labels{i}, 'FontSize',11, 'FontWeight','bold');
+    text(mean_cost(i)/1e6 + 0.15, mean_contain(i) + 250, labels{i}, 'FontSize',11, 'FontWeight','bold');
 end
 plot(0, 26000, 'p', 'MarkerSize',18, 'MarkerFaceColor',[1 0.84 0]);
-text(1.2, 26500, 'Utopia', 'FontWeight','bold');
+text(0.6, 26500, 'Utopia', 'FontWeight','bold');
 
 title('Tradespace: Wildfire Containment Area vs. System Cost (Monte Carlo Uncertainty)');
 xlabel('System Cost [Purchase + Cost of Operation] ($ millions)');
 ylabel('Wildfire Containment Area (m²)');
 grid on;
-xlim([0 32]);
-ylim([8000 28000]);           % Zoomed so error bars are clearly visible
+xlim([0 6]);
+ylim([8000 28000]);
 legend('Concepts with ±2σ', 'Pareto Front', 'Location','northwest');
 set(gca, 'FontSize',12);
 
