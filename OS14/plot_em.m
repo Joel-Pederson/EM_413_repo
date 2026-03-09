@@ -1118,10 +1118,13 @@ plot(pareto_x, pareto_y, '-o', 'Color', [1 0.65 0], 'LineWidth', 3.5, 'MarkerSiz
 labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', ...
           'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area', 'C12 Drone Insert'};
 for i = 1:8
-    if i == 1  % C1 Max Auto — nudge slightly left & up
+    if i == 1  % C1 Max Auto — nudge down & right
         text(mean_cost(i)/1e6 + 0.2, mean_contain(i) - 400, labels{i}, ...
              'FontSize',11, 'FontWeight','bold');
-    elseif i == 8  % C12 Drone Insert — nudge right & up
+    elseif i == 5  % C5 Strat Lift — nudge down
+        text(mean_cost(i)/1e6 + 0.2, mean_contain(i) - 350, labels{i}, ...
+             'FontSize',11, 'FontWeight','bold');
+    elseif i == 8  % C12 Drone Insert — nudge left & up
         text(mean_cost(i)/1e6 - 1.5, mean_contain(i) + 450, labels{i}, ...
              'FontSize',11, 'FontWeight','bold');
     else
@@ -1141,7 +1144,7 @@ xlim([-0.5 max(mean_cost/1e6) + 2.5]);
 ylim([8000 28000]);
 % Plot Historical Design of Reference (Smokejumpers)
 plot(hist_cost, hist_contain, 's', 'MarkerSize', 15, 'MarkerFaceColor', [0.5 0.5 0.5], 'MarkerEdgeColor', 'k', 'DisplayName', 'Historical Ref');
-text(hist_cost + 0.1, hist_contain, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
+text(hist_cost + 0.2, hist_contain + 350, 'Historical Baseline (Smokejumpers)', 'FontSize', 11, 'FontAngle', 'italic');
 % Call the legend (it will automatically grab all 'DisplayName' tags)
 legend('Location','northeast');
 set(gca, 'FontSize',12);
