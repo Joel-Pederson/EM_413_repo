@@ -711,9 +711,9 @@ fib_table.D5 = [8, 8, 8];   % 1:1, 3:1, 6:1
 fib_table.D6 = [5, NaN, NaN]; % A400M (fixed)
 fib_table.D7 = [5, 2, 3];   % SATCOM, Ground Node, Airborne Relay
 fib_table.D8 = [2, 5, 8];   % Teleop, Supervised, Coordinated
-fib_table.D9 = [2, 3, 1];   % Expendable, Ground, Air-based
+fib_table.D9 = [3, 2, 1];   % Ground, Expendable, Air-based
 fib_table.D10= [1, 2, 5];   % Bare, Individual, Containerized
-
+    
 % Sum the maximum score from each decision row in fib_table (handles NaN)
 fields = fieldnames(fib_table);
 max_fib_sum = 0;
