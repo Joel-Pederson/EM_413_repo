@@ -740,9 +740,12 @@ tri_rnd = @(a, c, b) a + sqrt(rand() * (b - a) * (c - a)) * (rand() < (c - a)/(b
 % Helper function to prevent negative costs from high-variance options
 pos = @(x) max(0, x); 
 
-% Preallocate Data Arrays (Length 7 to match rubric requirements)
-mean_contain = zeros(1,7); std_contain = zeros(1,7);
-mean_cost = zeros(1,7); std_cost = zeros(1,7);
+% Single source of truth for dynamic scaling
+num_concepts = 8; 
+
+% Dynamically preallocate arrays based on the variable for speed
+mean_contain = zeros(1, num_concepts); std_contain = zeros(1, num_concepts);
+mean_cost = zeros(1, num_concepts); std_cost = zeros(1, num_concepts);
 
 % ==================================================================
 % CONCEPT 1: High Precision, High Performance, Max Autonomy
@@ -1117,7 +1120,7 @@ plot(pareto_x, pareto_y, '-o', 'Color', [1 0.65 0], 'LineWidth', 3.5, 'MarkerSiz
 %  Concept Labels (Updated to match OS13 Matrix + Concept 12)
 labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', ...
           'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area', 'C12 Drone Insert'};
-for i = 1:8
+for i = 1:num_concepts
     if i == 1  % C1 Max Auto — nudge down & right
         text(mean_cost(i)/1e6 + 0.2, mean_contain(i) - 400, labels{i}, ...
              'FontSize',11, 'FontWeight','bold');
