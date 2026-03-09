@@ -764,7 +764,7 @@ for i = 1:nTrials
     hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
     % Hardware cost as product of two positive random costs
 
-    attr = 0; % Air-based recovery (no hardware penalty)
+    attr = 0; % Ground-crew recovery (no hardware penalty)
     % Operations cost: sum of positive random and triangular samples across stages
     ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_2, c_c2_2, b_c2_2)) + ...
           pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
@@ -1035,6 +1035,51 @@ title('Monte Carlo Distribution - Concept 11 Containment Area');
 xlabel('Containment Area (m²)'); ylabel('Probability Density'); grid on;
 xlim([mean_contain(7)-4*std_contain(7) mean_contain(7)+4*std_contain(7)]);
 
+% ==================================================================
+% CONCEPT 12: High Precision, High Performance, Max Autonomy, Drone Insertion
+% Matrix Mapping: D1o2, D2o1, D3o1, D4o1, D5o1, D6o1, D7o1, D8o3, D9o1, D10o3
+ca_samp = zeros(nTrials,1); c_samp = zeros(nTrials,1);
+for i = 1:nTrials
+    ca_samp(i) = normrnd(mu_d1_o2_area, sigma_d1_o2_area)*(fib_table.D1(2)/max_fib_sum) + ...
+                 (betarnd(alpha1,beta1)*(b1-a1)+a1)*(fib_table.D2(1)/max_fib_sum) + ...
+                 (betarnd(alpha_d3_o1, beta_d3_o1)*(b3-a3)+a3)*(fib_table.D3(1)/max_fib_sum) + ...
+                 normrnd(mu_d4_o1_area, sigma_d4_o1_area)*(fib_table.D4(1)/max_fib_sum) + ...
+                 normrnd(mu_d5_o1_area, sigma_d5_o1_area)*(fib_table.D5(1)/max_fib_sum) + ...
+                 normrnd(mu_d6_o1_area, sigma_d6_o1_area)*(fib_table.D6(1)/max_fib_sum) + ...
+                 (betarnd(alpha4,beta4)*(b4-a4)+a4)*(fib_table.D7(1)/max_fib_sum) + ...
+                 (betarnd(alpha8_3,beta8_3)*(b8_3-a8_3)+a8_3)*(fib_table.D8(3)/max_fib_sum) + ...
+                 normrnd(mu_d9_o1_area, sigma_d9_o1_area)*(fib_table.D9(1)/max_fib_sum) + ...
+                 (betarnd(alpha10_3,beta10_3)*(b10_3-a10_3)+a10_3)*(fib_table.D10(3)/max_fib_sum);
+    % Aggregate weighted area contributions from multiple components using random draws
+
+    hw = pos(normrnd(mu_d4_o1_cost, sigma_d4_o1_cost)) * pos(normrnd(mu_d5_o1_cost, sigma_d5_o1_cost));
+    % Hardware cost as product of two positive random costs
+
+    attr = 0; % Ground-crew recovery (no hardware penalty)
+    % Operations cost: sum of positive random and triangular samples across stages
+    ops = pos(normrnd(mu_d1_o2_cost, sigma_d1_o2_cost)) + pos(tri_rnd(a_c2_1, c_c2_1, b_c2_1)) + ...
+          pos(normrnd(mu_d3_o1_cost, sigma_d3_o1_cost)) + pos(normrnd(mu_d6_o1_cost, sigma_d6_o1_cost)) + ...
+          pos(tri_rnd(a_c7_1, c_c7_1, b_c7_1)) + pos(normrnd(mu_d8_o3_cost, sigma_d8_o3_cost)) + ...
+          pos(normrnd(mu_d9_o1_cost, sigma_d9_o1_cost)) + pos(normrnd(mu_d10_o3_cost, sigma_d10_o3_cost));
+    c_samp(i) = hw + attr + ops;
+end
+mean_contain(8) = mean(ca_samp); std_contain(8) = std(ca_samp);
+mean_cost(8) = mean(c_samp); std_cost(8) = std(c_samp);
+
+concepts_data(end+1,:) = {'Concept 12 (Drone Insert)', mean_contain(8), std_contain(8), mean_cost(8), std_cost(8)};
+
+% CONCEPT 12: Monte Carlo Distribution Curve (PDF)
+[pdf_values, x_pdf] = ksdensity(ca_samp);   % Smooth kernel density
+figure(38);
+plot(x_pdf, pdf_values, 'b', 'LineWidth', 2.5);
+hold on;
+xline(mean_contain(8), 'r--', 'LineWidth', 1.5, 'Label', sprintf('Mean = %.0f m²', mean_contain(8)));
+xline(mean_contain(8) - 2*std_contain(8), 'k--', 'LineWidth', 1.2, 'Label', '±2σ');
+xline(mean_contain(8) + 2*std_contain(8), 'k--', 'LineWidth', 1.2);
+title('Monte Carlo Distribution - Concept 12 Drone Insertion');
+xlabel('Containment Area (m²)'); ylabel('Probability Density'); grid on;
+xlim([mean_contain(8)-4*std_contain(8) mean_contain(8)+4*std_contain(8)]);
+
 %% ==================================================================
 % Q2 Tradespace Plot - BOTH Cost & Containment Uncertainty (±2σ)
 figure(25); clf;
@@ -1069,10 +1114,20 @@ end
 % Connect the dominant designs with straight lines
 plot(pareto_x, pareto_y, '-o', 'Color', [1 0.65 0], 'LineWidth', 3.5, 'MarkerSize', 8, 'MarkerFaceColor', [1 0.65 0], 'DisplayName', 'Pareto Front');
 
-% Concept Labels (Updated to match OS13 Matrix)
-labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', 'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area'};
-for i = 1:7
-    text(mean_cost(i)/1e6 + 0.2, mean_contain(i) + 350, labels{i}, 'FontSize',11, 'FontWeight','bold');
+%  Concept Labels (Updated to match OS13 Matrix + Concept 12)
+labels = {'C1 Max Auto', 'C2 Low Auto', 'C3 Med Auto', 'C4 Min Cost', ...
+          'C5 Strat Lift', 'C10 Min Area', 'C11 Max Area', 'C12 Drone Insert'};
+for i = 1:8
+    if i == 1  % C1 Max Auto — nudge slightly left & up
+        text(mean_cost(i)/1e6 + 0.2, mean_contain(i) - 400, labels{i}, ...
+             'FontSize',11, 'FontWeight','bold');
+    elseif i == 8  % C12 Drone Insert — nudge right & up
+        text(mean_cost(i)/1e6 - 1.5, mean_contain(i) + 450, labels{i}, ...
+             'FontSize',11, 'FontWeight','bold');
+    else
+        text(mean_cost(i)/1e6 + 0.2, mean_contain(i) + 350, labels{i}, ...
+             'FontSize',11, 'FontWeight','bold');
+    end
 end
 % Utopia Point
 plot(0, 26000, 'p', 'MarkerSize', 18, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', [1 0.84 0], 'DisplayName', 'Utopia Point');
