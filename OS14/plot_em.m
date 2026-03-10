@@ -1137,9 +1137,15 @@ end
 % Sheet 1: Decisions
 writecell(decisions_data, filename, 'Sheet', 'Decisions');
 
-% Calculate Distance to Utopia for all designs
-% Note: Using plotted units (Cost in $M, Area in m^2). 
-Dist_to_Utopia_All = sqrt((all_costs_full - 0).^2 + (all_areas_full - 26000).^2);
+% Calculate Normalized Distance to Utopia for all designs
+% Normalize axes to [0,1] so Area does not mathematically eclipse Cost
+max_cost_M = max(all_costs_full); 
+
+norm_costs = all_costs_full / max_cost_M;  % Utopia cost = 0
+norm_areas = all_areas_full / 26000;       % Utopia area = 1
+
+% Calculate true normalized Euclidean distance from Utopia point (0, 1)
+Dist_to_Utopia_All = sqrt((norm_costs - 0).^2 + (norm_areas - 1).^2);
 
 % Sheet 2: Pareto Front Concepts
 Pareto_Combos = combos(pareto_indices, :);
