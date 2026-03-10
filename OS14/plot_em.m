@@ -883,7 +883,7 @@ fib_mat(5,:) = [8, 8, 8];
 fib_mat(6,:) = [5, 0, 0]; % A400M fixed
 fib_mat(7,:) = [5, 2, 3];
 fib_mat(8,:) = [2, 5, 8];
-fib_mat(9,:) = [3, 2, 1]; % Ground, Expendable, Air
+fib_mat(9,:) = [2, 3, 1]; % Ground, Expendable, Air
 fib_mat(10,:) = [1, 2, 5];
 
 max_fib_sum = sum(max(fib_mat, [], 2)); 
