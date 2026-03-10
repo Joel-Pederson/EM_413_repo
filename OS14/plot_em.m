@@ -701,9 +701,31 @@ for i = 1:length(figHandles)
     end
 end
 
-% EM.413 OS14 
-% Allows manipulation and visualization of Containment (Performance) PDFs for OS14 Q1 and Q2
-close all; clear all; clc;
+%% --  Q2 FIBONACCI LOOKUP TABLE (from OS13 matrix) -- %%
+% Decision | Option1 score | Option2 score | Option3 score
+fib_table.D1 = [2, 3, 1];   % Self-Propelled, Containerized, Ground Loader
+fib_table.D2 = [5, 5, 1];   % Containerized Drone, Parafoil, Airbag
+fib_table.D3 = [3, 1, 2];   % Auto, Remote, Dual
+fib_table.D4 = [5, 3, 2];   % Homogenous, Two-Tier, Three Role
+fib_table.D5 = [8, 8, 8];   % 1:1, 3:1, 6:1
+fib_table.D6 = [5, NaN, NaN]; % A400M (fixed)
+fib_table.D7 = [5, 2, 3];   % SATCOM, Ground Node, Airborne Relay
+fib_table.D8 = [2, 5, 8];   % Teleop, Supervised, Coordinated
+fib_table.D9 = [2, 3, 1];   % Ground, Expendable, Air-based
+fib_table.D10= [1, 2, 5];   % Bare, Individual, Containerized
+    
+% Sum the maximum score from each decision row in fib_table (handles NaN)
+fields = fieldnames(fib_table);
+max_fib_sum = 0;
+for k = 1:numel(fields)
+    row = fib_table.(fields{k});
+    if ~isempty(row)
+        max_val = nanmax(row); % ignore NaNs when taking max
+        if ~isnan(max_val)
+            max_fib_sum = max_fib_sum + max_val;
+        end
+    end
+end
 
 % Initialize cell arrays for Excel export (Tab 1)
 decisions_data = {'Decision', 'Metric', 'Opt1_Name', 'Opt1_Mean', 'Opt1_Std', 'Opt2_Name', 'Opt2_Mean', 'Opt2_Std', 'Opt3_Name', 'Opt3_Mean', 'Opt3_Std'};
