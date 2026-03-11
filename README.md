@@ -10,4 +10,4 @@ System Cost (Minimize): Hardware procurement, expendability penalties, and flat 
 
 Wildfire Containment Area (Maximize): The physical square meter coverage the robot swarm can successfully manage, capped at a theoretical maximum of 26,000 m.
 
-The final output is a 3D mapped dataset that identifies the global Pareto front—the absolute best system architectures that yield the highest containment area per dollar spent—and computes their normalized distance to an ideal "Utopia" point.
+The final output is a two-dimensional tradespace that identifies the global Pareto front—the absolute best system concepts that yield the highest containment area per dollar spent—and computes their normalized distance to an ideal 'Utopia' point.
